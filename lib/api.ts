@@ -1,4 +1,4 @@
-export const API_BASE_URL: string = process.env.NEXT_PUBLIC_API_BASE_URL || "https://fifa-server-app.gentlesmoke-611be4af.centralindia.azurecontainerapps.io";
+export const API_BASE_URL: string = process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:4000";
 
 export type Team = {
   id: number;

@@ -75,8 +75,8 @@ export default function TopNav() {
                   <span className="material-symbols-outlined" style={{ fontVariationSettings: "'FILL' 1" }}>emoji_events</span>
                 </div>
                 <div>
-                  <h2 className="font-headline-md text-headline-md text-primary leading-tight">Tournament Admin</h2>
-                  <p className="font-label-md text-label-md text-on-surface-variant">Group Stage - Matchday 2</p>
+                  <h2 className="font-headline-md text-headline-md text-primary leading-tight">Fifa World Cup</h2>
+                  <p className="font-label-md text-label-md text-on-surface-variant">2026</p>
                 </div>
               </div>
               <button
