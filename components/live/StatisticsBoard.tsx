@@ -232,7 +232,7 @@ export default function StatisticsBoard() {
                 <span className="font-label-md text-xs text-on-surface-variant uppercase">Goals</span>
               </div>
             </div>
-            <div className="flex-1 flex items-end gap-1 md:gap-3 mt-4 min-h-32 md:min-h-50 border-b border-outline-variant/30 pb-2 relative">
+            <div className="flex-1 flex items-end gap-1 md:gap-3 mt-4 h-48 border-b border-outline-variant/30 pb-2 relative">
               <div className="absolute left-0 top-0 h-full w-full flex flex-col justify-between pointer-events-none pb-2">
                 {[0, 1, 2, 3, 4].map((i) => (
                   <div key={i} className="w-full border-t border-outline-variant/10" />
@@ -242,7 +242,7 @@ export default function StatisticsBoard() {
                 const maxGoals = goalBars[0]?.goals || 1;
                 const pct = Math.max(10, Math.round((player.goals / maxGoals) * 100));
                 return (
-                  <div key={player.id} className="flex-1 flex flex-col items-center gap-2 group z-10">
+                  <div key={player.id} className="flex-1 flex flex-col items-center gap-2 group z-10 h-full">
                     <div className="w-full max-w-10 bg-primary-container/20 hover:bg-primary-container/80 transition-colors rounded-t-sm relative flex justify-center cursor-pointer" style={{ height: `${pct}%` }}>
                       <span className="absolute -top-6 font-tabular-nums text-xs text-primary-container opacity-0 group-hover:opacity-100 transition-opacity">{player.goals}</span>
                     </div>
