@@ -68,6 +68,31 @@ export type StatsResponse = {
   data: Player[];
 };
 
+export type GroupStandingEntry = {
+  position: number;
+  name: string;
+  flagUrl: string | null;
+  confederation: string | null;
+  played: number;
+  won: number;
+  drawn: number;
+  lost: number;
+  goalsFor: number;
+  goalsAgainst: number;
+  goalDifference: number;
+  points: number;
+};
+
+export type StandingsGroup = {
+  group: string;
+  teams: GroupStandingEntry[];
+};
+
+export type StandingsResponse = {
+  source: string;
+  data: StandingsGroup[];
+};
+
 async function fetchJson<T>(path: string, init?: RequestInit): Promise<T> {
   const response = await fetch(`${API_BASE_URL}${path}`, {
     cache: "no-store",
@@ -102,4 +127,5 @@ export const api = {
   }),
   getTopScorers: () => fetchJson<StatsResponse>("/stats/top-scorers"),
   getAssistLeaders: () => fetchJson<StatsResponse>("/stats/assist-leaders"),
+  getStandings: () => fetchJson<StandingsResponse>("/stats/standings"),
 };

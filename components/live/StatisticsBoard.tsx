@@ -1,11 +1,11 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { api, Player } from "@/lib/api";
+import { api, Player, StandingsGroup } from "@/lib/api";
 
 export default function StatisticsBoard() {
   const [topScorers, setTopScorers] = useState<Player[]>([]);
-  const [topAssistLeaders, setTopAssistLeaders] = useState<Player[]>([]);
+  const [standings, setStandings] = useState<StandingsGroup[]>([]);
   const [scorerSource, setScorerSource] = useState<"live" | "local">("local");
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState<string | null>(null);
@@ -21,10 +21,10 @@ export default function StatisticsBoard() {
     }
 
     try {
-      const [scorers, assisters] = await Promise.all([api.getTopScorers(), api.getAssistLeaders()]);
+      const [scorers, standingsResult] = await Promise.all([api.getTopScorers(), api.getStandings()]);
       setTopScorers(scorers.data);
       setScorerSource(scorers.source);
-      setTopAssistLeaders(assisters.data);
+      setStandings(standingsResult.data);
     } catch (err: unknown) {
       setLoadError(err instanceof Error ? err.message : "Failed to load statistics");
     }
@@ -51,9 +51,8 @@ export default function StatisticsBoard() {
     return () => window.clearInterval(intervalId);
   }, []);
 
-  const hasStats = topScorers.some((p) => p.goals > 0) || topAssistLeaders.some((p) => p.assists > 0);
+  const hasStats = topScorers.some((p) => p.goals > 0) || standings.some((g) => g.teams.some((t) => t.played > 0));
   const highestScorer = topScorers[0];
-  const highestAssister = topAssistLeaders[0];
 
   const goalBars = useMemo(() => topScorers.slice(0, 8), [topScorers]);
 
@@ -153,35 +152,50 @@ export default function StatisticsBoard() {
             <div className="absolute -right-10 -top-10 w-40 h-40 bg-primary/5 rounded-full blur-3xl group-hover:bg-primary/10 transition-colors duration-500" />
             <div className="flex items-center justify-between mb-6">
               <h3 className="font-headline-md text-headline-md text-on-surface flex items-center gap-2">
-                <span className="material-symbols-outlined text-primary-container" style={{ fontVariationSettings: "'FILL' 1" }}>compare_arrows</span>
-                Top Playmakers
+                <span className="material-symbols-outlined text-primary-container" style={{ fontVariationSettings: "'FILL' 1" }}>leaderboard</span>
+                Group Standings
               </h3>
               <div className="flex items-center gap-2 text-primary-container text-sm font-label-md">
                 <span className="inline-flex h-2.5 w-2.5 rounded-full bg-primary-container animate-pulse" />
                 <span>Live</span>
               </div>
             </div>
-            <div className="flex flex-col gap-3">
-              {topAssistLeaders.map((player, index) => (
-                <div key={player.id} className={`flex items-center p-2 md:p-3 rounded-lg transition-colors ${index < 3 ? "bg-surface-container-high/50 border border-outline-variant/20 hover:bg-surface-container-high" : "hover:bg-surface-container-lowest/50"}`}>
-                  <span className={`font-tabular-nums font-bold w-5 md:w-6 text-xs md:text-base ${index < 3 ? "text-primary-container" : "text-on-surface-variant"}`}>{index + 1}</span>
-                  <div className="w-8 h-8 md:w-10 md:h-10 rounded-full bg-surface-container-highest border border-outline-variant flex items-center justify-center mr-2 md:mr-4 shrink-0 overflow-hidden">
-                    {player.team?.flagUrl ? (
-                      <img src={player.team.flagUrl} alt={`${player.team.name} flag`} className="h-full w-full object-cover" />
-                    ) : (
-                      <span className="material-symbols-outlined text-on-surface-variant text-sm">person</span>
-                    )}
+            <div className="flex flex-col gap-6">
+              {standings.length === 0 ? (
+                <p className="text-sm text-on-surface-variant">No matches played yet.</p>
+              ) : standings.map((group) => (
+                <div key={group.group}>
+                  <p className="font-label-md text-xs text-on-surface-variant uppercase tracking-wider mb-2">Group {group.group}</p>
+                  <div className="flex flex-col gap-1">
+                    {group.teams.map((team) => (
+                      <div key={team.name} className="flex items-center px-2 py-1.5 rounded-lg hover:bg-surface-container-lowest/50 transition-colors gap-1.5 text-xs">
+                        <span className={`font-tabular-nums font-bold w-4 text-center ${team.position <= 2 ? "text-primary-container" : "text-on-surface-variant"}`}>{team.position}</span>
+                        <div className="w-5 h-3.5 rounded-sm overflow-hidden shrink-0 border border-outline-variant/30 bg-surface-container-highest flex items-center justify-center">
+                          {team.flagUrl ? (
+                            <img src={team.flagUrl} alt="" className="h-full w-full object-cover" />
+                          ) : null}
+                        </div>
+                        <span className="flex-1 truncate font-medium text-on-surface">{team.name}</span>
+                        <span className="font-tabular-nums text-on-surface-variant w-3 text-center">{team.played}</span>
+                        <span className="font-tabular-nums text-on-surface-variant w-3 text-center">{team.won}</span>
+                        <span className="font-tabular-nums text-on-surface-variant w-3 text-center">{team.drawn}</span>
+                        <span className="font-tabular-nums text-on-surface-variant w-3 text-center">{team.lost}</span>
+                        <span className="font-tabular-nums text-on-surface-variant w-5 text-right">{team.goalsFor}:{team.goalsAgainst}</span>
+                        <span className={`font-tabular-nums font-bold w-5 text-right ${team.position <= 2 ? "text-primary-container" : "text-on-surface-variant"}`}>{team.points}</span>
+                      </div>
+                    ))}
                   </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="text-xs md:text-body-md md:font-body-md text-on-surface font-semibold truncate">{player.name}</p>
-                    <p className="text-[10px] md:text-xs font-label-md text-on-surface-variant uppercase tracking-wider">{player.team?.name || "Unknown team"}</p>
+                  <div className="flex gap-2 mt-1 px-2 text-[9px] font-label-md text-on-surface-variant uppercase tracking-wider">
+                    <span className="w-4" />
+                    <span className="w-5" />
+                    <span className="flex-1" />
+                    <span className="w-3 text-center">P</span>
+                    <span className="w-3 text-center">W</span>
+                    <span className="w-3 text-center">D</span>
+                    <span className="w-3 text-center">L</span>
+                    <span className="w-5 text-right">GD</span>
+                    <span className="w-5 text-right">Pts</span>
                   </div>
-                  {player.assists > 0 ? (
-                  <div className="text-right">
-                    <p className={`font-tabular-nums font-bold text-sm md:text-xl ${index < 3 ? "text-primary-container" : "text-on-surface"}`}>{player.assists}</p>
-                    <p className="text-[10px] md:text-xs font-label-md text-on-surface-variant uppercase">Assists</p>
-                  </div>
-                  ) : null}
                 </div>
               ))}
             </div>
@@ -242,18 +256,20 @@ export default function StatisticsBoard() {
               </div>
               <div>
                 <div className="flex justify-between items-end mb-2">
-                  <span className="font-label-md text-xs text-on-surface-variant uppercase tracking-wider">Top Assist Provider</span>
-                  <span className="font-tabular-nums text-sm text-secondary font-bold">{highestAssister ? `${highestAssister.name} (${highestAssister.assists})` : "None"}</span>
+                  <span className="font-label-md text-xs text-on-surface-variant uppercase tracking-wider">Group Leader</span>
+                  <span className="font-tabular-nums text-sm text-secondary font-bold">
+                    {standings.length > 0 && standings[0].teams.length > 0 ? standings[0].teams[0].name : "None"}
+                  </span>
                 </div>
                 <div className="h-2 w-full bg-surface-container-highest rounded-full overflow-hidden">
-                  <div className="h-full bg-secondary transition-all" style={{ width: `${Math.min(100, highestAssister?.assists ? highestAssister.assists * 12 : 10)}%` }} />
+                  <div className="h-full bg-secondary transition-all" style={{ width: `${Math.min(100, standings.length > 0 && standings[0].teams.length > 0 ? standings[0].teams[0].points * 20 : 10)}%` }} />
                 </div>
               </div>
               <div className="mt-2 p-4 rounded-lg bg-surface-container/50 border border-outline-variant/30 backdrop-blur-sm">
                 <div className="flex items-start gap-3">
                   <span className="material-symbols-outlined text-primary-container mt-0.5 shrink-0">insights</span>
                   <p className="font-body-md text-sm text-on-surface-variant leading-relaxed">
-                    Leaderboards now auto-refresh every 12 hours. If your backend begins ingesting live FIFA events, this page will reflect them automatically.
+                    Group standings auto-refresh from live match data. More groups will appear as games finish.
                   </p>
                 </div>
               </div>
