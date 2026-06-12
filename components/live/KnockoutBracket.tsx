@@ -15,7 +15,7 @@ const STAGE_SPACING: Record<string, number> = {
 };
 
 function formatDateIST(dateStr: string | null | undefined): string {
-  if (!dateStr) return "TBD";
+  if (!dateStr) return "";
   try {
     if (!dateStr.includes("T")) {
       const parts = dateStr.split("-");
@@ -35,7 +35,7 @@ function formatDateIST(dateStr: string | null | undefined): string {
       timeZone: "Asia/Kolkata",
     })} IST`;
   } catch {
-    return "TBD";
+    return "";
   }
 }
 
@@ -84,8 +84,8 @@ function TeamBadge({ team }: { team?: Match["homeTeam"] | Match["awayTeam"] }) {
 }
 
 function MatchCard({ match, accent, badgeLabel, onSelectWinner }: MatchCardProps) {
-  const homeTeam = match.homeLabel || match.homeTeam?.name || "TBD";
-  const awayTeam = match.awayLabel || match.awayTeam?.name || "TBD";
+  const homeTeam = match.homeLabel || match.homeTeam?.name || "";
+  const awayTeam = match.awayLabel || match.awayTeam?.name || "";
   const isDecided = match.played;
   const winner =
     isDecided && match.homeGoals > match.awayGoals ? "home" : isDecided ? "away" : null;

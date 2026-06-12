@@ -180,8 +180,8 @@ const mergedMatches = useMemo(() => {
             </div>
             <div className="grid gap-2">
               {stageMatches.map((match, idx) => {
-                const homeName = match.homeLabel || (match.homeTeam?.name ? match.homeTeam.name : match.stage || "TBD");
-                const awayName = match.awayLabel || (match.awayTeam?.name ? match.awayTeam.name : match.stage || "TBD");
+                const homeName = match.homeLabel || (match.homeTeam?.name ? match.homeTeam.name : match.stage || "");
+                const awayName = match.awayLabel || (match.awayTeam?.name ? match.awayTeam.name : match.stage || "");
                 const live = isInPlay(match);
                 return (
                   <div
@@ -200,7 +200,7 @@ const mergedMatches = useMemo(() => {
                       <p className="text-[10px] text-outline/60">{formatTime(match.date)}</p>
                     </div>
                     <div className="hidden md:block w-28 shrink-0 truncate">
-                      <p className="text-[10px] text-outline truncate">{match.venue || "Venue TBD"}</p>
+                      <p className="text-[10px] text-outline truncate">{match.venue || ""}</p>
                     </div>
                     <div className="flex-1 flex items-center justify-center gap-2 md:gap-4 min-w-0">
                       <span className={`text-xs md:text-sm truncate text-right flex-1 ${match.played || live ? "text-on-surface font-semibold" : "text-on-surface-variant"}`}>
