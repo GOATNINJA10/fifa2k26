@@ -8,6 +8,15 @@ function scoreText(match: Match) {
   return `${match.homeGoals} - ${match.awayGoals}`;
 }
 
+const CONFED_COLORS: Record<string, string> = {
+  UEFA: "#3b82f6",
+  CONMEBOL: "#22c55e",
+  AFC: "#ef4444",
+  CAF: "#f59e0b",
+  CONCACAF: "#a855f7",
+  OFC: "#06b6d4",
+};
+
 const COLORS = [
   "#00ff41", "#e9c349", "#4fc3f7", "#ff7043", "#ab47bc",
   "#26a69a", "#ef5350", "#7e57c2", "#66bb6a", "#ffa726",
@@ -17,6 +26,23 @@ const COLORS = [
   "#90a4ae", "#ef9a9a", "#81d4fa", "#a1887f", "#b0bec5",
   "#ffcc80", "#c8e6c9",
 ];
+
+function normalizeName(name: string | null | undefined) {
+  if (!name) return "";
+  const map: Record<string, string> = {
+    "czech republic": "czechia",
+    "bosnia and herzegovina": "bosnia-herzegovina",
+    "türkiye": "turkey",
+    "curacao": "curacao",
+  };
+  const n = name
+    .toLowerCase()
+    .trim()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/[^a-z0-9 -]/g, "");
+  return map[n] || n;
+}
 
 function polarToCartesian(cx: number, cy: number, r: number, angleDeg: number) {
   const rad = (angleDeg - 90) * (Math.PI / 180);
@@ -55,7 +81,7 @@ function PieChart({ data }: { data: { name: string; goals: number }[] }) {
     const labelR = r * 0.65;
     const lx = cx + labelR * Math.cos(midRad);
     const ly = cy + labelR * Math.sin(midRad);
-    return { i, ...d, startAngle, endAngle, lx, ly, color: COLORS[i % COLORS.length], sliceAngle };
+    return { i, ...d, startAngle, endAngle, lx, ly, color: CONFED_COLORS[d.name] || COLORS[i % COLORS.length], sliceAngle };
   });
 
   return (
@@ -166,19 +192,30 @@ export default function LiveDashboard() {
   const inPlayMatches = liveSource === "live" ? matches.filter((match) => match.status === "IN_PLAY" || match.status === "PAUSED" || match.status === "LIVE") : [];
   const totalGoals = playedMatches.reduce((sum, match) => sum + match.homeGoals + match.awayGoals, 0);
 
-  const goalsByCountry = useMemo(() => {
+  const confederationMap = useMemo(() => {
+    const map = new Map<string, string>();
+    for (const t of teams) {
+      const key = normalizeName(t.name);
+      if (key) map.set(key, t.confederation || "Other");
+    }
+    return map;
+  }, [teams]);
+
+  const goalsByConfederation = useMemo(() => {
     const map = new Map<string, number>();
     for (const match of playedMatches) {
       if (match.stage !== "Group" && match.stage !== "GROUP_STAGE") continue;
-      const homeName = match.homeTeam?.name || match.homeLabel || "";
-      const awayName = match.awayTeam?.name || match.awayLabel || "";
-      if (homeName) map.set(homeName, (map.get(homeName) || 0) + match.homeGoals);
-      if (awayName) map.set(awayName, (map.get(awayName) || 0) + match.awayGoals);
+      const homeName = normalizeName(match.homeTeam?.name || match.homeLabel);
+      const awayName = normalizeName(match.awayTeam?.name || match.awayLabel);
+      const homeConf = homeName ? confederationMap.get(homeName) : undefined;
+      const awayConf = awayName ? confederationMap.get(awayName) : undefined;
+      if (homeConf) map.set(homeConf, (map.get(homeConf) || 0) + match.homeGoals);
+      if (awayConf) map.set(awayConf, (map.get(awayConf) || 0) + match.awayGoals);
     }
     return Array.from(map.entries())
       .map(([name, goals]) => ({ name, goals }))
       .sort((a, b) => b.goals - a.goals);
-  }, [playedMatches]);
+  }, [playedMatches, confederationMap]);
 
   const recentResults = useMemo(
     () => playedMatches.slice().sort((a, b) => (b.matchNumber ?? b.id) - (a.matchNumber ?? a.id)).slice(0, 5),
@@ -280,10 +317,10 @@ export default function LiveDashboard() {
           <div className="glass-panel p-4 md:p-6 rounded-xl border border-outline-variant flex flex-col">
             <div>
               <h3 className="text-sm md:text-headline-md md:font-headline-md text-on-surface mb-1">Goals by Country</h3>
-              <p className="text-xs md:text-label-md md:font-label-md text-outline">{goalsByCountry.length ? `${goalsByCountry.length} countries scored` : "No goals yet"}</p>
+              <p className="text-xs md:text-label-md md:font-label-md text-outline">{goalsByConfederation.length ? `${goalsByConfederation.length} confederations scored` : "No goals yet"}</p>
             </div>
-            {goalsByCountry.length > 0 ? (
-              <PieChart data={goalsByCountry} />
+            {goalsByConfederation.length > 0 ? (
+              <PieChart data={goalsByConfederation} />
             ) : !loading && (
               <div className="text-center py-8">
                 <p className="text-on-surface-variant text-[10px] md:text-xs">No group stage goals scored yet</p>
