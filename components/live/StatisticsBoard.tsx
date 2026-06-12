@@ -165,37 +165,54 @@ export default function StatisticsBoard() {
                 <p className="text-sm text-on-surface-variant">No matches played yet.</p>
               ) : standings.map((group) => (
                 <div key={group.group}>
-                  <p className="font-label-md text-xs text-on-surface-variant uppercase tracking-wider mb-2">Group {group.group}</p>
-                  <div className="flex flex-col gap-1">
-                    {group.teams.map((team) => (
-                      <div key={team.name} className="flex items-center px-2 py-1.5 rounded-lg hover:bg-surface-container-lowest/50 transition-colors gap-1.5 text-xs">
-                        <span className={`font-tabular-nums font-bold w-4 text-center ${team.position <= 2 ? "text-primary-container" : "text-on-surface-variant"}`}>{team.position}</span>
-                        <div className="w-5 h-3.5 rounded-sm overflow-hidden shrink-0 border border-outline-variant/30 bg-surface-container-highest flex items-center justify-center">
-                          {team.flagUrl ? (
-                            <img src={team.flagUrl} alt="" className="h-full w-full object-cover" />
-                          ) : null}
-                        </div>
-                        <span className="flex-1 truncate font-medium text-on-surface">{team.name}</span>
-                        <span className="font-tabular-nums text-on-surface-variant w-3 text-center">{team.played}</span>
-                        <span className="font-tabular-nums text-on-surface-variant w-3 text-center">{team.won}</span>
-                        <span className="font-tabular-nums text-on-surface-variant w-3 text-center">{team.drawn}</span>
-                        <span className="font-tabular-nums text-on-surface-variant w-3 text-center">{team.lost}</span>
-                        <span className="font-tabular-nums text-on-surface-variant w-5 text-right">{team.goalsFor}:{team.goalsAgainst}</span>
-                        <span className={`font-tabular-nums font-bold w-5 text-right ${team.position <= 2 ? "text-primary-container" : "text-on-surface-variant"}`}>{team.points}</span>
-                      </div>
-                    ))}
-                  </div>
-                  <div className="flex gap-2 mt-1 px-2 text-[9px] font-label-md text-on-surface-variant uppercase tracking-wider">
-                    <span className="w-4" />
-                    <span className="w-5" />
-                    <span className="flex-1" />
-                    <span className="w-3 text-center">P</span>
-                    <span className="w-3 text-center">W</span>
-                    <span className="w-3 text-center">D</span>
-                    <span className="w-3 text-center">L</span>
-                    <span className="w-5 text-right">GD</span>
-                    <span className="w-5 text-right">Pts</span>
-                  </div>
+                  <p className="font-label-md text-xs text-on-surface-variant/70 uppercase tracking-wider mb-2">Group {group.group}</p>
+                  <table className="w-full text-xs">
+                    <thead>
+                      <tr className="text-on-surface-variant/60 font-label-md uppercase tracking-wider text-[10px] border-b border-outline-variant/20">
+                        <th className="text-left pb-1.5 font-normal w-5">#</th>
+                        <th className="text-left pb-1.5 font-normal">Team</th>
+                        <th className="text-center pb-1.5 font-normal w-6">P</th>
+                        <th className="text-center pb-1.5 font-normal w-6">W</th>
+                        <th className="text-center pb-1.5 font-normal w-6">D</th>
+                        <th className="text-center pb-1.5 font-normal w-6">L</th>
+                        <th className="text-center pb-1.5 font-normal w-8">GF</th>
+                        <th className="text-center pb-1.5 font-normal w-8">GA</th>
+                        <th className="text-center pb-1.5 font-normal w-8">GD</th>
+                        <th className="text-center pb-1.5 font-normal w-8">Pts</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {group.teams.map((team) => (
+                        <tr key={team.name} className={`group/row border-b border-outline-variant/5 ${team.position <= 2 ? "bg-emerald-900/5" : ""} hover:bg-surface-container-lowest/50 transition-colors`}>
+                          <td className="py-1.5">
+                            <span className={`font-tabular-nums font-bold w-5 block text-center text-xs ${team.position <= 2 ? "text-emerald-400" : "text-on-surface-variant/60"}`}>
+                              {team.position === 1 ? "①" : team.position === 2 ? "②" : team.position === 3 ? "③" : `④`}
+                            </span>
+                          </td>
+                          <td className="py-1.5">
+                            <div className="flex items-center gap-2">
+                              <div className="w-5 h-3.5 rounded-sm overflow-hidden shrink-0 border border-outline-variant/20 bg-surface-container-highest flex items-center justify-center shadow-sm">
+                                {team.flagUrl ? (
+                                  <img src={team.flagUrl} alt="" className="h-full w-full object-cover" />
+                                ) : null}
+                              </div>
+                              <span className={`font-medium truncate ${team.position <= 2 ? "text-on-surface" : "text-on-surface/80"}`}>{team.name}</span>
+                            </div>
+                          </td>
+                          <td className="text-center py-1.5 font-tabular-nums text-on-surface-variant/80">{team.played}</td>
+                          <td className="text-center py-1.5 font-tabular-nums text-on-surface-variant/80">{team.won}</td>
+                          <td className="text-center py-1.5 font-tabular-nums text-on-surface-variant/80">{team.drawn}</td>
+                          <td className="text-center py-1.5 font-tabular-nums text-on-surface-variant/80">{team.lost}</td>
+                          <td className="text-center py-1.5 font-tabular-nums text-on-surface-variant/80">{team.goalsFor}</td>
+                          <td className="text-center py-1.5 font-tabular-nums text-on-surface-variant/80">{team.goalsAgainst}</td>
+                          <td className={`text-center py-1.5 font-tabular-nums font-semibold tabular-nums ${team.goalDifference > 0 ? "text-emerald-400" : team.goalDifference < 0 ? "text-red-400" : "text-on-surface-variant/80"}`}>
+                            {team.goalDifference > 0 ? `+${team.goalDifference}` : team.goalDifference}
+                          </td>
+                          <td className={`text-center py-1.5 font-tabular-nums font-bold text-sm ${team.position <= 2 ? "text-emerald-400" : "text-on-surface"}`}>{team.points}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
                 </div>
               ))}
             </div>
