@@ -6,6 +6,7 @@ export const metadata: Metadata = {
   title: "Fifa World Cup 2026 Simulator",
   description:
     "Fifa World Cup Tournament Simulator — manage and simulate matches, group stages, knockout brackets and full statistics for the Fifa World Cup 2026.",
+  icons: { icon: "/icons/icon.svg" },
 };
 
 export default function RootLayout({
