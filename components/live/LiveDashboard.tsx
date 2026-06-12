@@ -192,6 +192,20 @@ export default function LiveDashboard() {
   const inPlayMatches = liveSource === "live" ? matches.filter((match) => match.status === "IN_PLAY" || match.status === "PAUSED" || match.status === "LIVE") : [];
   const totalGoals = playedMatches.reduce((sum, match) => sum + match.homeGoals + match.awayGoals, 0);
 
+  const teamNameMap = useMemo(() => {
+    const map = new Map<string, string>();
+    for (const t of teams) {
+      const key = normalizeName(t.name);
+      if (key) map.set(key, t.name);
+    }
+    return map;
+  }, [teams]);
+
+  function localName(apiName: string | null | undefined) {
+    const n = normalizeName(apiName);
+    return n ? teamNameMap.get(n) || apiName || "" : "";
+  }
+
   const confederationMap = useMemo(() => {
     const map = new Map<string, string>();
     for (const t of teams) {
@@ -347,7 +361,7 @@ export default function LiveDashboard() {
                 {inPlayMatches.map((match) => (
                   <div key={`live-${match.id}`} className="bg-red-900/20 p-2 md:p-4 rounded-lg border border-red-500/40 flex justify-between items-center transition-colors">
                     <div className="flex flex-col items-end w-[35%] md:w-[40%]">
-                      <span className="text-xs md:text-body-md md:font-body-md text-on-surface font-semibold truncate max-w-full">{match.homeLabel || (match.homeTeam?.name ? match.homeTeam.name : match.stage || "")}</span>
+                      <span className="text-xs md:text-body-md md:font-body-md text-on-surface font-semibold truncate max-w-full">{match.homeLabel || localName(match.homeTeam?.name) || match.stage || ""}</span>
                       <span className="text-[10px] md:text-label-md md:font-label-md text-outline">{match.stage}</span>
                     </div>
                     <div className="flex flex-col items-center px-1 md:px-2 w-[20%] md:w-[20%]">
@@ -355,7 +369,7 @@ export default function LiveDashboard() {
                       <span className="text-[10px] md:text-tabular-nums md:font-tabular-nums text-red-400 animate-pulse">LIVE</span>
                     </div>
                     <div className="flex flex-col items-start w-[35%] md:w-[40%]">
-                      <span className="text-xs md:text-body-md md:font-body-md font-semibold text-primary-container truncate max-w-full">{match.awayLabel || (match.awayTeam?.name ? match.awayTeam.name : match.stage || "")}</span>
+                      <span className="text-xs md:text-body-md md:font-body-md font-semibold text-primary-container truncate max-w-full">{match.awayLabel || localName(match.awayTeam?.name) || match.stage || ""}</span>
                       <span className="text-[10px] md:text-label-md md:font-label-md text-outline truncate max-w-full">{match.venue || ""}</span>
                     </div>
                   </div>
@@ -374,8 +388,8 @@ export default function LiveDashboard() {
             {recentResults.map((match) => {
               const homeWon = match.homeGoals > match.awayGoals;
               const awayWon = match.awayGoals > match.homeGoals;
-              const homeName = match.homeLabel || (match.homeTeam?.name ? match.homeTeam.name : match.stage || "");
-              const awayName = match.awayLabel || (match.awayTeam?.name ? match.awayTeam.name : match.stage || "");
+              const homeName = match.homeLabel || localName(match.homeTeam?.name) || match.stage || "";
+              const awayName = match.awayLabel || localName(match.awayTeam?.name) || match.stage || "";
               return (
                 <div key={match.id} className="bg-surface p-2 md:p-4 rounded-lg border border-outline-variant flex justify-between items-center hover:border-primary/50 transition-colors">
                   <div className="flex flex-col items-end w-[35%] md:w-[40%]">
