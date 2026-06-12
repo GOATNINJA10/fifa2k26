@@ -38,55 +38,76 @@ function formatTime(dateStr: string | null | undefined) {
 
 export default function MatchSchedule() {
   const [matches, setMatches] = useState<Match[]>([]);
-  const [liveMap, setLiveMap] = useState<Map<number, Partial<Match>>>(new Map());
+  const [liveMap, setLiveMap] = useState<Map<string, Partial<Match>>>(new Map());
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState<string | null>(null);
   const [liveSource, setLiveSource] = useState<"live" | "local">("local");
 
-  async function load() {
-    setLoading(true);
-    setLoadError(null);
-    try {
-      const [data, live] = await Promise.all([
-        api.getMatches(),
-        api.getLiveMatches().catch(() => null),
-      ]);
-      setMatches(data);
-      if (live && live.source === "live" && live.matches.length > 0) {
-        const map = new Map<number, Partial<Match>>();
-        for (const m of live.matches) {
-          if (m.id != null) map.set(m.id, m);
-        }
-        setLiveMap(map);
-        setLiveSource("live");
+function normalizeName(name: string) {
+  const map: Record<string, string> = {
+    "czech republic": "czechia",
+    "bosnia and herzegovina": "bosnia-herzegovina",
+    "türkiye": "turkey",
+    "curacao": "curacao",
+  };
+  const n = name
+    .toLowerCase()
+    .trim()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/[^a-z0-9 -]/g, "");
+  return map[n] || n;
+}
+
+async function load() {
+  setLoading(true);
+  setLoadError(null);
+  try {
+    const [data, live] = await Promise.all([
+      api.getMatches(),
+      api.getLiveMatches().catch(() => null),
+    ]);
+    setMatches(data);
+    if (live && live.source === "live" && live.matches.length > 0) {
+      const map = new Map<string, Partial<Match>>();
+      for (const m of live.matches) {
+        const home = typeof m.homeTeam === "object" && m.homeTeam ? normalizeName(m.homeTeam.name) : "";
+        const away = typeof m.awayTeam === "object" && m.awayTeam ? normalizeName(m.awayTeam.name) : "";
+        if (home && away) map.set(`${home}|${away}`, m);
       }
-    } catch (err: unknown) {
-      setLoadError(err instanceof Error ? err.message : "Failed to load matches");
-    } finally {
-      setLoading(false);
+      setLiveMap(map);
+      setLiveSource("live");
     }
+  } catch (err: unknown) {
+    setLoadError(err instanceof Error ? err.message : "Failed to load matches");
+  } finally {
+    setLoading(false);
   }
+}
 
-  useEffect(() => {
-    load();
-    const interval = setInterval(load, 60000);
-    return () => clearInterval(interval);
-  }, []);
+useEffect(() => {
+  load();
+  const interval = setInterval(load, 60000);
+  return () => clearInterval(interval);
+}, []);
 
-  const mergedMatches = useMemo(() => {
-    if (liveMap.size === 0) return matches;
-    return matches.map((m) => {
-      const live = liveMap.get(m.id);
-      if (!live) return m;
-      return {
-        ...m,
-        homeGoals: live.homeGoals ?? m.homeGoals,
-        awayGoals: live.awayGoals ?? m.awayGoals,
-        played: live.played ?? m.played,
-        status: live.status ?? m.status,
-      };
-    });
-  }, [matches, liveMap]);
+const mergedMatches = useMemo(() => {
+  if (liveMap.size === 0) return matches;
+  return matches.map((m) => {
+    const home = normalizeName(m.homeTeam?.name ?? "");
+    const away = normalizeName(m.awayTeam?.name ?? "");
+    const key = `${home}|${away}`;
+    const live = liveMap.get(key);
+    if (!live) return m;
+    return {
+      ...m,
+      homeGoals: live.homeGoals ?? m.homeGoals,
+      awayGoals: live.awayGoals ?? m.awayGoals,
+      played: live.played ?? m.played,
+      status: live.status ?? m.status,
+    };
+  });
+}, [matches, liveMap]);
 
   const grouped = useMemo(() => {
     const map = new Map<string, Match[]>();
