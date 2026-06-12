@@ -160,9 +160,9 @@ export default function StatisticsBoard() {
                 <span>Live</span>
               </div>
             </div>
-            <div className="flex flex-col gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {standings.length === 0 ? (
-                <p className="text-sm text-on-surface-variant">No matches played yet.</p>
+                <p className="text-sm text-on-surface-variant col-span-full">No matches played yet.</p>
               ) : standings.map((group) => (
                 <div key={group.group}>
                   <p className="font-label-md text-xs text-on-surface-variant/70 uppercase tracking-wider mb-2">Group {group.group}</p>
