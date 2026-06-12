@@ -24,8 +24,8 @@ export type Match = {
   matchNumber?: number | null;
   homeLabel?: string | null;
   awayLabel?: string | null;
-  homeTeam?: { name: string } | Team | null;
-  awayTeam?: { name: string } | Team | null;
+  homeTeam?: Team | null;
+  awayTeam?: Team | null;
   date?: string | null;
   venue?: string | null;
   stage?: string | null;
