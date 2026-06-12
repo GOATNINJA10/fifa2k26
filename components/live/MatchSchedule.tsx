@@ -180,8 +180,8 @@ const mergedMatches = useMemo(() => {
             </div>
             <div className="grid gap-2">
               {stageMatches.map((match, idx) => {
-                const homeName = match.homeTeam?.name ?? match.homeLabel ?? "TBD";
-                const awayName = match.awayTeam?.name ?? match.awayLabel ?? "TBD";
+                const homeName = match.homeLabel || (match.homeTeam?.name ? match.homeTeam.name : `Match ${match.matchNumber || match.id}`);
+                const awayName = match.awayLabel || (match.awayTeam?.name ? match.awayTeam.name : `Match ${match.matchNumber || match.id}`);
                 const live = isInPlay(match);
                 return (
                   <div
