@@ -387,7 +387,7 @@ export default function LiveDashboard() {
                     <span className="text-[10px] md:text-tabular-nums md:font-tabular-nums text-on-surface-variant">FT</span>
                   </div>
                   <div className="flex flex-col items-start w-[35%] md:w-[40%]">
-                    <span className={`text-xs md:text-body-md md:font-body-md font-semibold truncate max-w-full ${awayWon ? "text-green-400" : "text-primary-container"}`}>{awayName}</span>
+                    <span className={`text-xs md:text-body-md md:font-body-md font-semibold truncate max-w-full ${awayWon ? "text-green-400" : "text-on-surface"}`}>{awayName}</span>
                     <span className="text-[10px] md:text-label-md md:font-label-md text-outline truncate max-w-full">{match.venue || "Venue TBD"}</span>
                   </div>
                 </div>
