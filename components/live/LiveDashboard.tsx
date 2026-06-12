@@ -169,7 +169,7 @@ export default function LiveDashboard() {
   const goalsByCountry = useMemo(() => {
     const map = new Map<string, number>();
     for (const match of playedMatches) {
-      if (match.stage !== "Group") continue;
+      if (match.stage !== "Group" && match.stage !== "GROUP_STAGE") continue;
       const homeName = match.homeTeam?.name || match.homeLabel || "";
       const awayName = match.awayTeam?.name || match.awayLabel || "";
       if (homeName) map.set(homeName, (map.get(homeName) || 0) + match.homeGoals);
