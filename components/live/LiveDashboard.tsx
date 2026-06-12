@@ -316,7 +316,7 @@ export default function LiveDashboard() {
 
           <div className="glass-panel p-4 md:p-6 rounded-xl border border-outline-variant flex flex-col">
             <div>
-              <h3 className="text-sm md:text-headline-md md:font-headline-md text-on-surface mb-1">Goals by Country</h3>
+              <h3 className="text-sm md:text-headline-md md:font-headline-md text-on-surface mb-1">Goals by Confederation</h3>
               <p className="text-xs md:text-label-md md:font-label-md text-outline">{goalsByConfederation.length ? `${goalsByConfederation.length} confederations scored` : "No goals yet"}</p>
             </div>
             {goalsByConfederation.length > 0 ? (
