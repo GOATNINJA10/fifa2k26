@@ -43,7 +43,8 @@ export default function MatchSchedule() {
   const [loadError, setLoadError] = useState<string | null>(null);
   const [liveSource, setLiveSource] = useState<"live" | "local">("local");
 
-function normalizeName(name: string) {
+function normalizeName(name: string | null | undefined) {
+  if (!name) return "";
   const map: Record<string, string> = {
     "czech republic": "czechia",
     "bosnia and herzegovina": "bosnia-herzegovina",
