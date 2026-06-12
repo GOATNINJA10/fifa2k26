@@ -158,9 +158,12 @@ export default function LiveDashboard() {
 
   useEffect(() => {
     load();
+    const interval = setInterval(load, 60000);
+    return () => clearInterval(interval);
   }, []);
 
   const playedMatches = matches.filter((match) => match.played);
+  const inPlayMatches = matches.filter((match) => match.status === "IN_PLAY" || match.status === "PAUSED" || match.status === "LIVE");
   const totalGoals = playedMatches.reduce((sum, match) => sum + match.homeGoals + match.awayGoals, 0);
 
   const goalsByCountry = useMemo(() => {
@@ -298,7 +301,32 @@ export default function LiveDashboard() {
             </span>
           </div>
           <div className="flex flex-col gap-2 md:gap-3 overflow-y-auto pr-1">
-            {recentResults.length === 0 && !loading && (
+            {inPlayMatches.length > 0 && (
+              <>
+                <div className="flex items-center gap-2 mb-1">
+                  <span className="w-2 h-2 rounded-full bg-red-500 animate-pulse" />
+                  <span className="text-xs md:text-label-md md:font-label-md text-red-400 font-semibold uppercase tracking-wider">Live Now</span>
+                </div>
+                {inPlayMatches.map((match) => (
+                  <div key={`live-${match.id}`} className="bg-red-900/20 p-2 md:p-4 rounded-lg border border-red-500/40 flex justify-between items-center transition-colors">
+                    <div className="flex flex-col items-end w-[35%] md:w-[40%]">
+                      <span className="text-xs md:text-body-md md:font-body-md text-on-surface font-semibold truncate max-w-full">{match.homeLabel || match.homeTeam?.name || "TBD"}</span>
+                      <span className="text-[10px] md:text-label-md md:font-label-md text-outline">{match.stage}</span>
+                    </div>
+                    <div className="flex flex-col items-center px-1 md:px-2 w-[20%] md:w-[20%]">
+                      <span className="text-sm md:text-headline-md md:font-headline-md text-secondary whitespace-nowrap">{scoreText(match)}</span>
+                      <span className="text-[10px] md:text-tabular-nums md:font-tabular-nums text-red-400 animate-pulse">LIVE</span>
+                    </div>
+                    <div className="flex flex-col items-start w-[35%] md:w-[40%]">
+                      <span className="text-xs md:text-body-md md:font-body-md font-semibold text-primary-container truncate max-w-full">{match.awayLabel || match.awayTeam?.name || "TBD"}</span>
+                      <span className="text-[10px] md:text-label-md md:font-label-md text-outline truncate max-w-full">{match.venue || "Venue TBD"}</span>
+                    </div>
+                  </div>
+                ))}
+                <hr className="border-outline-variant my-2" />
+              </>
+            )}
+            {!loading && recentResults.length === 0 && inPlayMatches.length === 0 && (
               <div className="text-center py-4">
                 <p className="text-on-surface-variant text-xs md:text-sm">World Cup starts June 12, 2026</p>
                 <p className="text-on-surface-variant text-[10px] md:text-xs mt-1">Matches will appear here once the tournament begins.</p>

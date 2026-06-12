@@ -24,14 +24,15 @@ export type Match = {
   matchNumber?: number | null;
   homeLabel?: string | null;
   awayLabel?: string | null;
-  homeTeam?: Team | null;
-  awayTeam?: Team | null;
+  homeTeam?: { name: string } | Team | null;
+  awayTeam?: { name: string } | Team | null;
   date?: string | null;
   venue?: string | null;
   stage?: string | null;
   homeGoals: number;
   awayGoals: number;
   played: boolean;
+  status?: string;
 };
 
 type KnockoutFixture = {
