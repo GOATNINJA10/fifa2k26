@@ -162,8 +162,8 @@ export default function LiveDashboard() {
     return () => clearInterval(interval);
   }, []);
 
-  const playedMatches = matches.filter((match) => match.played);
-  const inPlayMatches = matches.filter((match) => match.status === "IN_PLAY" || match.status === "PAUSED" || match.status === "LIVE");
+  const playedMatches = liveSource === "live" ? matches.filter((match) => match.played) : [];
+  const inPlayMatches = liveSource === "live" ? matches.filter((match) => match.status === "IN_PLAY" || match.status === "PAUSED" || match.status === "LIVE") : [];
   const totalGoals = playedMatches.reduce((sum, match) => sum + match.homeGoals + match.awayGoals, 0);
 
   const goalsByCountry = useMemo(() => {
@@ -328,8 +328,10 @@ export default function LiveDashboard() {
             )}
             {!loading && recentResults.length === 0 && inPlayMatches.length === 0 && (
               <div className="text-center py-4">
-                <p className="text-on-surface-variant text-xs md:text-sm">World Cup starts June 12, 2026</p>
-                <p className="text-on-surface-variant text-[10px] md:text-xs mt-1">Matches will appear here once the tournament begins.</p>
+                <p className="text-on-surface-variant text-xs md:text-sm">
+                  {liveSource === "live" ? "No matches played yet" : "No live data available"}
+                </p>
+                <p className="text-on-surface-variant text-[10px] md:text-xs mt-1">{liveSource === "live" ? "Waiting for real match results..." : "Real match results will appear here."}</p>
               </div>
             )}
             {recentResults.map((match) => (
