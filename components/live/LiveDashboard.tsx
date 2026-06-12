@@ -316,16 +316,12 @@ export default function LiveDashboard() {
             </div>
           </div>
 
-          <div className="glass-panel p-4 md:p-6 rounded-xl border border-outline-variant hover:bg-surface-variant/50 transition-colors flex flex-col justify-between">
-            <div>
-              <h3 className="text-sm md:text-headline-md md:font-headline-md text-on-surface mb-1">Start Here</h3>
-              <p className="text-xs md:text-label-md md:font-label-md text-outline">Ready to build the bracket?</p>
-            </div>
-            <div className="mt-3 md:mt-4">
-              <Link href="/group-stage" className="inline-block bg-primary-container text-on-primary-container px-3 py-1.5 md:px-4 md:py-2 rounded-lg text-xs md:text-label-md md:font-label-md hover:scale-105 transition-transform">
-                Go to Group Stage
-              </Link>
-            </div>
+          <div className="glass-panel p-4 md:p-6 rounded-xl border border-outline-variant hover:bg-surface-variant/50 transition-colors">
+            <h3 className="text-sm md:text-headline-md md:font-headline-md text-on-surface mb-1">Start Here</h3>
+            <p className="text-xs md:text-label-md md:font-label-md text-outline mb-3 md:mb-4">Ready to build the bracket?</p>
+            <Link href="/group-stage" className="inline-block bg-primary-container text-on-primary-container px-3 py-1.5 md:px-4 md:py-2 rounded-lg text-xs md:text-label-md md:font-label-md hover:scale-105 transition-transform">
+              Go to Group Stage
+            </Link>
           </div>
 
           <div className="glass-panel p-4 md:p-6 rounded-xl border border-outline-variant flex flex-col">
