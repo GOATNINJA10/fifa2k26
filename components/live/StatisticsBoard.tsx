@@ -54,7 +54,7 @@ export default function StatisticsBoard() {
   const hasStats = topScorers.some((p) => p.goals > 0) || standings.some((g) => g.teams.some((t) => t.played > 0));
   const highestScorer = topScorers[0];
 
-  const goalBars = useMemo(() => topScorers.slice(0, 8), [topScorers]);
+  const goalBars = useMemo(() => topScorers.slice(0, 5), [topScorers]);
 
   if (loadError && topScorers.length === 0) {
     return (
@@ -121,7 +121,7 @@ export default function StatisticsBoard() {
             </div>
             <div className="flex flex-col gap-3">
               {loading && <div className="text-sm text-on-surface-variant">Loading scorers...</div>}
-              {topScorers.map((player, index) => (
+              {topScorers.slice(0, 5).map((player, index) => (
                 <div key={player.id} className={`flex items-center p-2 md:p-3 rounded-lg transition-colors ${index < 3 ? "bg-surface-container-high/50 border border-outline-variant/20 hover:bg-surface-container-high" : "hover:bg-surface-container-lowest/50"}`}>
                   <span className={`font-tabular-nums text-tabular-nums font-bold w-5 md:w-6 text-xs md:text-base ${index < 3 ? "text-secondary" : "text-on-surface-variant"}`}>{index + 1}</span>
                   <div className="w-8 h-8 md:w-10 md:h-10 rounded-full bg-surface-container-highest border border-outline-variant flex items-center justify-center mr-2 md:mr-4 shrink-0 overflow-hidden">
