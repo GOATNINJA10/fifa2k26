@@ -1,36 +1,109 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# FIFA 2026 World Cup Tournament Manager
+
+A full-stack 2026 FIFA World Cup tournament manager with live scores, group standings, top scorers, and knockout bracket visualization.
+
+## Features
+
+- **Live Scores** — Real-time match results from football-data.org, cached server-side (55s TTL)
+- **Group Standings** — Auto-computed from live match data with qualifying spot highlights
+- **Top Scorers** — Live goal scorer data from worldcup26.ir, with auto-name expansion from seeded player names
+- **Knockout Bracket** — Interactive bracket editor with drag-and-drop team assignment
+- **Match Simulation** — Rating-based simulation for testing tournament scenarios
+- **Statistics Dashboard** — Golden Boot race, team offensive output, control metrics
+- **PDF Export** — Download bracket as PDF
+
+## Tech Stack
+
+| Layer | Technology |
+|-------|-----------|
+| Frontend | Next.js 16, React 19, Tailwind CSS 4 |
+| Backend | Express.js, TypeORM |
+| Database | SQLite (dev) / PostgreSQL (production) |
+| Live Scores | football-data.org API |
+| Goal Scorers | worldcup26.ir API |
+| Deploy | Azure Container Apps (backend), Vercel (frontend) |
+
+## Project Structure
+
+```
+├── app/                    # Next.js frontend
+│   ├── app/(dashboard)/    # Routes (group-stage, knockout, schedule, statistics)
+│   ├── components/         # React components
+│   └── lib/api.ts          # API client
+├── server/                 # Express backend
+│   ├── src/entities/       # TypeORM entities (Match, Team, Player)
+│   ├── src/routes/         # API routes (matches, groups, stats, tournament)
+│   ├── src/lib/            # Live stats, knockout logic
+│   └── src/seed.ts         # Database seeder
+└── package.json
+```
 
 ## Getting Started
 
-First, run the development server:
+### Prerequisites
+
+- Node.js 22+
+- npm
+
+### Setup
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+# Install dependencies
+cd server && npm install
+cd ../app && npm install
+
+# Set up environment variables
+cp server/.env.example server/.env
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Required environment variables (`server/.env`):
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+```
+PORT=4000
+FOOTBALL_DATA_API_TOKEN=your_token
+FOOTBALL_DATA_COMPETITION_CODE=WC
+API_FOOTBALL_KEY=your_key  # Optional, for assist leaders
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+### Run
 
-## Learn More
+```bash
+# Seed database and start backend
+cd server && npm run seed && npm start
 
-To learn more about Next.js, take a look at the following resources:
+# Start frontend (separate terminal)
+cd app && npm run dev
+```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+Frontend: http://localhost:3000  
+Backend: http://localhost:4000
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## API Endpoints
 
-## Deploy on Vercel
+| Endpoint | Description |
+|----------|-------------|
+| `GET /matches` | All matches |
+| `GET /matches/live` | Live match results (55s cache) |
+| `GET /groups` | Groups with teams |
+| `GET /groups/:id/standings` | Group standings |
+| `GET /stats/top-scorers` | Top scorers (worldcup26.ir → DB) |
+| `GET /stats/standings` | Live group standings |
+| `GET /tournament/bracket` | Knockout bracket |
+| `PUT /matches/:id` | Update match score |
+| `POST /matches/:id/simulate` | Simulate match |
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## Live Data Sources
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+1. **football-data.org** — Match scores, status, venues. Cached for 55s to respect rate limits.
+2. **worldcup26.ir** — Free API for goal scorers with player names and minutes. No API key required.
+3. **API-Football** — Paid fallback for top scorers and assist leaders (optional).
+
+## Deployment
+
+- **Backend**: Docker → Azure Container Registry → Azure Container Apps
+- **Frontend**: Git push → Vercel (auto-deploy from `main` branch)
+- **Database**: PostgreSQL (production), SQLite (development)
+
+## License
+
+MIT
