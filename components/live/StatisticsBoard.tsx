@@ -6,6 +6,7 @@ import { api, Player, StandingsGroup } from "@/lib/api";
 export default function StatisticsBoard() {
   const [topScorers, setTopScorers] = useState<Player[]>([]);
   const [standings, setStandings] = useState<StandingsGroup[]>([]);
+  const [totalGoals, setTotalGoals] = useState(0);
   const [scorerSource, setScorerSource] = useState<"live" | "local">("local");
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState<string | null>(null);
@@ -25,6 +26,7 @@ export default function StatisticsBoard() {
       setTopScorers(scorers.data);
       setScorerSource(scorers.source);
       setStandings(standingsResult.data);
+      setTotalGoals(scorers.meta?.totalGoals ?? scorers.data.reduce((s, p) => s + p.goals, 0));
     } catch (err: unknown) {
       setLoadError(err instanceof Error ? err.message : "Failed to load statistics");
     }
@@ -54,7 +56,6 @@ export default function StatisticsBoard() {
   const hasStats = topScorers.some((p) => p.goals > 0) || standings.some((g) => g.teams.some((t) => t.played > 0));
   const highestScorer = topScorers[0];
 
-  const totalGoals = useMemo(() => topScorers.reduce((s, p) => s + p.goals, 0), [topScorers]);
   const teamGoals = useMemo(() => {
     const totals = new Map<string, { name: string; flagUrl: string | null; goals: number }>();
     for (const p of topScorers) {
