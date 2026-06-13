@@ -66,7 +66,7 @@ export type Player = {
 export type StatsResponse = {
   source: "live" | "local";
   data: Player[];
-  meta?: { totalGoals: number };
+  meta?: { totalGoals: number; teamGoals: Array<{ name: string; goals: number }> };
 };
 
 export type GroupStandingEntry = {

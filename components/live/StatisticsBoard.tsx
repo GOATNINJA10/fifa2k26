@@ -26,7 +26,14 @@ export default function StatisticsBoard() {
       setTopScorers(scorers.data);
       setScorerSource(scorers.source);
       setStandings(standingsResult.data);
-      setTotalGoals(scorers.meta?.totalGoals ?? scorers.data.reduce((s, p) => s + p.goals, 0));
+      setTotalGoals(scorers.meta?.totalGoals ?? 0);
+      if (scorers.meta?.teamGoals) {
+        const flagMap = new Map<string, string | null>();
+        for (const p of scorers.data) {
+          if (p.team) flagMap.set(p.team.name, p.team.flagUrl ?? null);
+        }
+        setTeamGoals(scorers.meta.teamGoals.map((t) => ({ ...t, flagUrl: flagMap.get(t.name) ?? null })));
+      }
     } catch (err: unknown) {
       setLoadError(err instanceof Error ? err.message : "Failed to load statistics");
     }
@@ -56,17 +63,7 @@ export default function StatisticsBoard() {
   const hasStats = topScorers.some((p) => p.goals > 0) || standings.some((g) => g.teams.some((t) => t.played > 0));
   const highestScorer = topScorers[0];
 
-  const teamGoals = useMemo(() => {
-    const totals = new Map<string, { name: string; flagUrl: string | null; goals: number }>();
-    for (const p of topScorers) {
-      if (!p.team) continue;
-      const key = p.team.name;
-      const cur = totals.get(key);
-      if (cur) cur.goals += p.goals;
-      else totals.set(key, { name: key, flagUrl: p.team.flagUrl ?? null, goals: p.goals });
-    }
-    return [...totals.values()].sort((a, b) => b.goals - a.goals).slice(0, 5);
-  }, [topScorers]);
+  const [teamGoals, setTeamGoals] = useState<Array<{ name: string; goals: number; flagUrl: string | null }>>([]);
 
   if (loadError && topScorers.length === 0) {
     return (
