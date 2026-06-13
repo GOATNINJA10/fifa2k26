@@ -54,7 +54,17 @@ export default function StatisticsBoard() {
   const hasStats = topScorers.some((p) => p.goals > 0) || standings.some((g) => g.teams.some((t) => t.played > 0));
   const highestScorer = topScorers[0];
 
-  const goalBars = useMemo(() => topScorers.slice(0, 5), [topScorers]);
+  const teamGoals = useMemo(() => {
+    const totals = new Map<string, { name: string; flagUrl: string | null; goals: number }>();
+    for (const p of topScorers) {
+      if (!p.team) continue;
+      const key = p.team.name;
+      const cur = totals.get(key);
+      if (cur) cur.goals += p.goals;
+      else totals.set(key, { name: key, flagUrl: p.team.flagUrl ?? null, goals: p.goals });
+    }
+    return [...totals.values()].sort((a, b) => b.goals - a.goals).slice(0, 5);
+  }, [topScorers]);
 
   if (loadError && topScorers.length === 0) {
     return (
@@ -219,34 +229,33 @@ export default function StatisticsBoard() {
           </div>
         </div>
 
-        {topScorers.some((p) => p.goals > 0) ? (
+        {teamGoals.length > 0 ? (
         <div className="col-span-12 lg:col-span-8">
           <div className="bg-surface-container rounded-xl border border-white/5 p-4 md:p-6 h-full flex flex-col">
             <div className="flex justify-between items-center mb-6">
               <div>
                 <h3 className="font-headline-md text-headline-md text-on-surface">Team Offensive Output</h3>
-                <p className="font-label-md text-sm text-on-surface-variant">Highest scoring players drive the simulation chart below.</p>
+                <p className="font-label-md text-sm text-on-surface-variant">Teams sorted by total goals scored.</p>
               </div>
               <div className="flex items-center gap-2">
                 <div className="w-3 h-3 bg-primary-container rounded-sm" />
                 <span className="font-label-md text-xs text-on-surface-variant uppercase">Goals</span>
               </div>
             </div>
-            <div className="flex-1 flex items-end gap-1 md:gap-3 mt-4 h-48 border-b border-outline-variant/30 pb-2 relative">
-              <div className="absolute left-0 top-0 h-full w-full flex flex-col justify-between pointer-events-none pb-2">
-                {[0, 1, 2, 3, 4].map((i) => (
-                  <div key={i} className="w-full border-t border-outline-variant/10" />
-                ))}
-              </div>
-              {goalBars.map((player) => {
-                const maxGoals = goalBars[0]?.goals || 1;
-                const pct = Math.max(10, Math.round((player.goals / maxGoals) * 100));
+            <div className="flex flex-col gap-3">
+              {teamGoals.map((t) => {
+                const maxGoal = teamGoals[0].goals || 1;
+                const pct = Math.max(8, Math.round((t.goals / maxGoal) * 100));
                 return (
-                  <div key={player.id} className="flex-1 flex flex-col items-center gap-2 group z-10 h-full">
-                    <div className="w-full max-w-10 bg-primary-container/20 hover:bg-primary-container/80 transition-colors rounded-t-sm relative flex justify-center cursor-pointer" style={{ height: `${pct}%` }}>
-                      <span className="absolute -top-6 font-tabular-nums text-xs text-primary-container opacity-0 group-hover:opacity-100 transition-opacity">{player.goals}</span>
+                  <div key={t.name} className="flex items-center gap-3">
+                    <div className="w-6 h-4 rounded-sm overflow-hidden shrink-0 border border-outline-variant/20 bg-surface-container-highest">
+                      {t.flagUrl ? <img src={t.flagUrl} alt="" className="h-full w-full object-cover" /> : null}
                     </div>
-                    <span className="font-label-md text-xs text-on-surface-variant uppercase truncate w-full text-center">{player.name}</span>
+                    <span className="w-28 md:w-40 text-xs font-medium text-on-surface truncate shrink-0">{t.name}</span>
+                    <div className="flex-1 h-5 bg-surface-container-highest rounded-full overflow-hidden">
+                      <div className="h-full bg-primary-container rounded-full transition-all" style={{ width: `${pct}%` }} />
+                    </div>
+                    <span className="w-6 text-right font-tabular-nums font-bold text-sm text-on-surface">{t.goals}</span>
                   </div>
                 );
               })}
