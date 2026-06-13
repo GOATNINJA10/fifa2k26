@@ -54,6 +54,7 @@ export default function StatisticsBoard() {
   const hasStats = topScorers.some((p) => p.goals > 0) || standings.some((g) => g.teams.some((t) => t.played > 0));
   const highestScorer = topScorers[0];
 
+  const totalGoals = useMemo(() => topScorers.reduce((s, p) => s + p.goals, 0), [topScorers]);
   const teamGoals = useMemo(() => {
     const totals = new Map<string, { name: string; flagUrl: string | null; goals: number }>();
     for (const p of topScorers) {
@@ -282,13 +283,11 @@ export default function StatisticsBoard() {
               </div>
               <div>
                 <div className="flex justify-between items-end mb-2">
-                  <span className="font-label-md text-xs text-on-surface-variant uppercase tracking-wider">Group Leader</span>
-                  <span className="font-tabular-nums text-sm text-secondary font-bold">
-                    {standings.length > 0 && standings[0].teams.length > 0 ? standings[0].teams[0].name : "None"}
-                  </span>
+                  <span className="font-label-md text-xs text-on-surface-variant uppercase tracking-wider">Total Goals</span>
+                  <span className="font-tabular-nums text-sm text-secondary font-bold">{totalGoals}</span>
                 </div>
                 <div className="h-2 w-full bg-surface-container-highest rounded-full overflow-hidden">
-                  <div className="h-full bg-secondary transition-all" style={{ width: `${Math.min(100, standings.length > 0 && standings[0].teams.length > 0 ? standings[0].teams[0].points * 20 : 10)}%` }} />
+                  <div className="h-full bg-secondary transition-all" style={{ width: `${Math.min(100, totalGoals * 6)}%` }} />
                 </div>
               </div>
               <div className="mt-2 p-4 rounded-lg bg-surface-container/50 border border-outline-variant/30 backdrop-blur-sm">
