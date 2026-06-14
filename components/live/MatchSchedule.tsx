@@ -121,9 +121,11 @@ const mergedMatches = useMemo(() => {
       const stageMatches = mergedMatches
         .filter((m) => m.stage === stage)
         .sort((a, b) => {
-          const wa = wcSchedule[a.id]?.orderIndex ?? Infinity;
-          const wb = wcSchedule[b.id]?.orderIndex ?? Infinity;
-          if (wa !== Infinity || wb !== Infinity) return wa - wb;
+          const da = wcSchedule[a.id]?.dateTime;
+          const db = wcSchedule[b.id]?.dateTime;
+          if (da && db) return da.localeCompare(db);
+          if (da) return -1;
+          if (db) return 1;
           return (a.matchNumber ?? 0) - (b.matchNumber ?? 0);
         });
       if (stageMatches.length > 0) map.set(stage, stageMatches);
