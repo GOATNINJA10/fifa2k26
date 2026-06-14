@@ -15,30 +15,33 @@ const STAGE_LABELS: Record<string, string> = {
 
 const STAGE_ORDER = ["Group", "R32", "R16", "QF", "SF", "3P", "F"];
 
-function formatDate(dateStr: string | null | undefined) {
-  if (!dateStr) return "";
-  if (!dateStr.includes("T")) {
-    const parts = dateStr.split("-");
+function formatDate(dateStr: string | null | undefined, wcDate?: string) {
+  const s = wcDate || dateStr;
+  if (!s) return "";
+  if (!s.includes("T")) {
+    const parts = s.split("-");
     if (parts.length === 3) {
       const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
       return `${months[parseInt(parts[1]) - 1]} ${parseInt(parts[2])}, ${parts[0]}`;
     }
-    return dateStr;
+    return s;
   }
-  const d = new Date(dateStr);
+  const d = new Date(s);
   return d.toLocaleDateString("en-IN", { month: "short", day: "numeric", year: "numeric", timeZone: "Asia/Kolkata" });
 }
 
-function formatTime(dateStr: string | null | undefined) {
-  if (!dateStr) return "";
-  if (!dateStr.includes("T")) return "";
-  const d = new Date(dateStr);
+function formatTime(dateStr: string | null | undefined, wcDate?: string) {
+  const s = wcDate || dateStr;
+  if (!s) return "";
+  if (!s.includes("T")) return "";
+  const d = new Date(s);
   return d.toLocaleTimeString("en-IN", { hour: "2-digit", minute: "2-digit", timeZone: "Asia/Kolkata" }) + " IST";
 }
 
 export default function MatchSchedule() {
   const [matches, setMatches] = useState<Match[]>([]);
   const [liveMap, setLiveMap] = useState<Map<string, Partial<Match>>>(new Map());
+  const [wcSchedule, setWcSchedule] = useState<Record<number, { dateTime: string; orderIndex: number }>>({});
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState<string | null>(null);
   const [liveSource, setLiveSource] = useState<"live" | "local">("local");
@@ -64,11 +67,13 @@ async function load() {
   setLoading(true);
   setLoadError(null);
   try {
-    const [data, live] = await Promise.all([
+    const [data, live, schedule] = await Promise.all([
       api.getMatches(),
       api.getLiveMatches().catch(() => null),
+      api.getWcSchedule().catch(() => ({})),
     ]);
     setMatches(data);
+    setWcSchedule(schedule);
     if (live && live.source === "live" && live.matches.length > 0) {
       const map = new Map<string, Partial<Match>>();
       for (const m of live.matches) {
@@ -115,11 +120,16 @@ const mergedMatches = useMemo(() => {
     for (const stage of STAGE_ORDER) {
       const stageMatches = mergedMatches
         .filter((m) => m.stage === stage)
-        .sort((a, b) => (a.matchNumber ?? 0) - (b.matchNumber ?? 0));
+        .sort((a, b) => {
+          const wa = wcSchedule[a.id]?.orderIndex ?? Infinity;
+          const wb = wcSchedule[b.id]?.orderIndex ?? Infinity;
+          if (wa !== Infinity || wb !== Infinity) return wa - wb;
+          return (a.matchNumber ?? 0) - (b.matchNumber ?? 0);
+        });
       if (stageMatches.length > 0) map.set(stage, stageMatches);
     }
     return map;
-  }, [mergedMatches]);
+  }, [mergedMatches, wcSchedule]);
 
   const isInPlay = (m: Match) => m.status === "IN_PLAY" || m.status === "PAUSED" || m.status === "LIVE";
 
@@ -196,8 +206,8 @@ const mergedMatches = useMemo(() => {
                   >
                     <span className="text-[10px] md:text-xs text-outline w-5 md:w-7 shrink-0 tabular-nums">{idx + 1}</span>
                     <div className="hidden md:block w-20 shrink-0">
-                      <p className="text-[10px] text-outline font-medium">{formatDate(match.date)}</p>
-                      <p className="text-[10px] text-outline/60">{formatTime(match.date)}</p>
+                      <p className="text-[10px] text-outline font-medium">{formatDate(match.date, wcSchedule[match.id]?.dateTime)}</p>
+                      <p className="text-[10px] text-outline/60">{formatTime(match.date, wcSchedule[match.id]?.dateTime)}</p>
                     </div>
                     <div className="hidden md:block w-28 shrink-0 truncate">
                       <p className="text-[10px] text-outline truncate">{match.venue || ""}</p>

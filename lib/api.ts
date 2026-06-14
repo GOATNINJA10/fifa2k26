@@ -129,4 +129,5 @@ export const api = {
   getTopScorers: () => fetchJson<StatsResponse>("/stats/top-scorers"),
   getAssistLeaders: () => fetchJson<StatsResponse>("/stats/assist-leaders"),
   getStandings: () => fetchJson<StandingsResponse>("/stats/standings"),
+  getWcSchedule: () => fetchJson<Record<number, { dateTime: string; orderIndex: number }>>("/matches/wc-schedule"),
 };
