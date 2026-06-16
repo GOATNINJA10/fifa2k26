@@ -317,13 +317,13 @@ export default function LiveDashboard() {
           </div>
 
           <div className="glass-panel p-4 md:p-6 rounded-xl border border-outline-variant hover:bg-surface-variant/50 transition-colors relative overflow-hidden">
-            <div className="absolute -bottom-6 -right-6 text-8xl md:text-9xl opacity-[0.04] pointer-events-none select-none animate-float-1">
-              ⚽
-            </div>
-            <div className="absolute -top-4 -left-4 text-6xl md:text-7xl opacity-[0.03] pointer-events-none select-none animate-float-3 rotate-45">
-              ⚽
-            </div>
-            <div className="absolute top-1/2 right-4 w-24 h-24 md:w-32 md:h-32 rounded-full border-2 border-primary/5 pointer-events-none animate-pulse" />
+            <div className="absolute top-2 left-6 text-lg md:text-xl opacity-[0.06] pointer-events-none select-none animate-float-1">⚽</div>
+            <div className="absolute top-8 right-8 text-base md:text-lg opacity-[0.05] pointer-events-none select-none animate-float-2">⚽</div>
+            <div className="absolute bottom-8 left-10 text-xl md:text-2xl opacity-[0.06] pointer-events-none select-none animate-float-3">⚽</div>
+            <div className="absolute bottom-12 right-12 text-sm md:text-base opacity-[0.04] pointer-events-none select-none animate-float-1" style={{ animationDelay: "2s" }}>⚽</div>
+            <div className="absolute top-1/3 left-3 text-base md:text-lg opacity-[0.05] pointer-events-none select-none animate-float-2" style={{ animationDelay: "4s" }}>⚽</div>
+            <div className="absolute top-2/3 right-6 text-lg md:text-xl opacity-[0.04] pointer-events-none select-none animate-float-3" style={{ animationDelay: "1s" }}>⚽</div>
+            <div className="absolute top-1/2 left-1/2 text-xs md:text-sm opacity-[0.03] pointer-events-none select-none animate-float-1" style={{ animationDelay: "3s" }}>⚽</div>
             <h3 className="text-sm md:text-headline-md md:font-headline-md text-on-surface mb-1">Start Here</h3>
             <p className="text-xs md:text-label-md md:font-label-md text-outline mb-3 md:mb-4">Ready to build the bracket?</p>
             <Link href="/group-stage" className="inline-block bg-primary-container text-on-primary-container px-3 py-1.5 md:px-4 md:py-2 rounded-lg text-xs md:text-label-md md:font-label-md hover:scale-105 transition-transform relative z-10">
