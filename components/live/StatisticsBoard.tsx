@@ -8,6 +8,7 @@ export default function StatisticsBoard() {
   const [standings, setStandings] = useState<StandingsGroup[]>([]);
   const [totalGoals, setTotalGoals] = useState(0);
   const [scorerSource, setScorerSource] = useState<"live" | "local">("local");
+  const [standingsSource, setStandingsSource] = useState<"live" | "local">("local");
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState<string | null>(null);
   const [refreshing, setRefreshing] = useState(false);
@@ -26,6 +27,7 @@ export default function StatisticsBoard() {
       setTopScorers(scorers.data);
       setScorerSource(scorers.source);
       setStandings(standingsResult.data);
+      setStandingsSource(standingsResult.source);
       setTotalGoals(scorers.meta?.totalGoals ?? 0);
       if (scorers.meta?.teamGoals) {
         const flagMap = new Map<string, string | null>();
@@ -130,7 +132,13 @@ export default function StatisticsBoard() {
             </div>
             <div className="flex flex-col gap-3">
               {loading && <div className="text-sm text-on-surface-variant">Loading scorers...</div>}
-              {topScorers.slice(0, 5).map((player, index) => (
+              {!loading && scorerSource === "local" && topScorers.every((p) => p.goals === 0) ? (
+                <div className="flex flex-col items-center justify-center py-8 gap-2 text-center">
+                  <span className="material-symbols-outlined text-3xl text-outline">sports_soccer</span>
+                  <p className="text-sm text-on-surface-variant">No top scorers found</p>
+                  <p className="text-xs text-outline/60">Live scorer API unavailable</p>
+                </div>
+              ) : topScorers.slice(0, 5).map((player, index) => (
                 <div key={player.id} className={`flex items-center p-2 md:p-3 rounded-lg transition-colors ${index < 3 ? "bg-surface-container-high/50 border border-outline-variant/20 hover:bg-surface-container-high" : "hover:bg-surface-container-lowest/50"}`}>
                   <span className={`font-tabular-nums text-tabular-nums font-bold w-5 md:w-6 text-xs md:text-base ${index < 3 ? "text-secondary" : "text-on-surface-variant"}`}>{index + 1}</span>
                   <div className="w-8 h-8 md:w-10 md:h-10 rounded-full bg-surface-container-highest border border-outline-variant flex items-center justify-center mr-2 md:mr-4 shrink-0 overflow-hidden">
@@ -170,7 +178,13 @@ export default function StatisticsBoard() {
               </div>
             </div>
             <div className="flex flex-col gap-6 overflow-y-auto max-h-[520px] pr-1">
-              {standings.length === 0 ? (
+              {!loading && standingsSource === "local" ? (
+                <div className="flex flex-col items-center justify-center py-8 gap-2 text-center">
+                  <span className="material-symbols-outlined text-3xl text-outline">leaderboard</span>
+                  <p className="text-sm text-on-surface-variant">No standings found</p>
+                  <p className="text-xs text-outline/60">Live standings API unavailable</p>
+                </div>
+              ) : standings.length === 0 ? (
                 <p className="text-sm text-on-surface-variant col-span-full">No matches played yet.</p>
               ) : standings.map((group) => (
                 <div key={group.group}>
