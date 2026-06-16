@@ -25,9 +25,9 @@ export default function StatisticsBoard() {
     try {
       const [scorers, standingsResult] = await Promise.all([api.getTopScorers(), api.getStandings()]);
       setTopScorers(scorers.data);
-      setScorerSource(scorers.source);
+      setScorerSource(scorers.source === "live" ? "live" : "local");
       setStandings(standingsResult.data);
-      setStandingsSource(standingsResult.source as "live" | "local");
+      setStandingsSource(standingsResult.source === "live" ? "live" : "local");
       setTotalGoals(scorers.meta?.totalGoals ?? 0);
       if (scorers.meta?.teamGoals) {
         const flagMap = new Map<string, string | null>();
