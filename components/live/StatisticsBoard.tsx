@@ -27,7 +27,7 @@ export default function StatisticsBoard() {
       setTopScorers(scorers.data);
       setScorerSource(scorers.source);
       setStandings(standingsResult.data);
-      setStandingsSource(standingsResult.source);
+      setStandingsSource(standingsResult.source as "live" | "local");
       setTotalGoals(scorers.meta?.totalGoals ?? 0);
       if (scorers.meta?.teamGoals) {
         const flagMap = new Map<string, string | null>();
