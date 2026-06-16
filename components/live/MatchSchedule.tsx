@@ -222,7 +222,7 @@ function parseScorerDisplay(raw: string | null): string {
                 const live = isInPlay(match);
                 const scorerKey = `${normalizeName(homeName)}|${normalizeName(awayName)}`;
                 const scorers = scorerMap.get(scorerKey);
-                const hasScorers = match.played && scorers && (scorers.homeScorers || scorers.awayScorers);
+                const hasScorers = (match.played || live) && scorers && (scorers.homeScorers || scorers.awayScorers);
                 return (
                   <div
                     key={match.id}

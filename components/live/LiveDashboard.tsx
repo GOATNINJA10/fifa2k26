@@ -384,22 +384,37 @@ export default function LiveDashboard() {
                   <span className="w-2 h-2 rounded-full bg-red-500 animate-pulse" />
                   <span className="text-xs md:text-label-md md:font-label-md text-red-400 font-semibold uppercase tracking-wider">Live Now</span>
                 </div>
-                {inPlayMatches.map((match) => (
-                  <div key={`live-${match.id}`} className="bg-red-900/20 p-2 md:p-4 rounded-lg border border-red-500/40 flex justify-between items-center transition-colors">
-                    <div className="flex flex-col items-end w-[35%] md:w-[40%]">
-                      <span className="text-xs md:text-body-md md:font-body-md text-on-surface font-semibold truncate max-w-full">{match.homeLabel || localName(match.homeTeam?.name) || match.stage || ""}</span>
-                      <span className="text-[10px] md:text-label-md md:font-label-md text-outline">{match.stage}</span>
+                {inPlayMatches.map((match) => {
+                  const homeName = match.homeLabel || localName(match.homeTeam?.name) || match.stage || "";
+                  const awayName = match.awayLabel || localName(match.awayTeam?.name) || match.stage || "";
+                  const scorerKey = `${normalizeName(homeName)}|${normalizeName(awayName)}`;
+                  const scorers = scorerMap.get(scorerKey);
+                  return (
+                    <div key={`live-${match.id}`} className="bg-red-900/20 p-2 md:p-4 rounded-lg border border-red-500/40 transition-colors">
+                      <div className="flex justify-between items-center">
+                        <div className="flex flex-col items-end w-[35%] md:w-[40%]">
+                          <span className="text-xs md:text-body-md md:font-body-md text-on-surface font-semibold truncate max-w-full">{homeName}</span>
+                          <span className="text-[10px] md:text-label-md md:font-label-md text-outline">{match.stage}</span>
+                        </div>
+                        <div className="flex flex-col items-center px-1 md:px-2 w-[20%] md:w-[20%]">
+                          <span className="text-sm md:text-headline-md md:font-headline-md text-secondary whitespace-nowrap">{scoreText(match)}</span>
+                          <span className="text-[10px] md:text-tabular-nums md:font-tabular-nums text-red-400 animate-pulse">LIVE</span>
+                        </div>
+                        <div className="flex flex-col items-start w-[35%] md:w-[40%]">
+                          <span className="text-xs md:text-body-md md:font-body-md font-semibold text-primary-container truncate max-w-full">{awayName}</span>
+                          <span className="text-[10px] md:text-label-md md:font-label-md text-outline truncate max-w-full">{match.venue || ""}</span>
+                        </div>
+                      </div>
+                      {scorers && (scorers.homeScorers || scorers.awayScorers) && (
+                        <div className="flex justify-center gap-4 md:gap-8 mt-1.5 text-[10px] md:text-xs text-red-400/70">
+                          <div className="text-right w-[35%] md:w-[40%]">{parseScorerDisplay(scorers.homeScorers)}</div>
+                          <div className="w-[20%] md:w-[20%]" />
+                          <div className="text-left w-[35%] md:w-[40%]">{parseScorerDisplay(scorers.awayScorers)}</div>
+                        </div>
+                      )}
                     </div>
-                    <div className="flex flex-col items-center px-1 md:px-2 w-[20%] md:w-[20%]">
-                      <span className="text-sm md:text-headline-md md:font-headline-md text-secondary whitespace-nowrap">{scoreText(match)}</span>
-                      <span className="text-[10px] md:text-tabular-nums md:font-tabular-nums text-red-400 animate-pulse">LIVE</span>
-                    </div>
-                    <div className="flex flex-col items-start w-[35%] md:w-[40%]">
-                      <span className="text-xs md:text-body-md md:font-body-md font-semibold text-primary-container truncate max-w-full">{match.awayLabel || localName(match.awayTeam?.name) || match.stage || ""}</span>
-                      <span className="text-[10px] md:text-label-md md:font-label-md text-outline truncate max-w-full">{match.venue || ""}</span>
-                    </div>
-                  </div>
-                ))}
+                  );
+                })}
                 <hr className="border-outline-variant my-2" />
               </>
             )}
