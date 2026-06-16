@@ -316,10 +316,17 @@ export default function LiveDashboard() {
             </div>
           </div>
 
-          <div className="glass-panel p-4 md:p-6 rounded-xl border border-outline-variant hover:bg-surface-variant/50 transition-colors">
+          <div className="glass-panel p-4 md:p-6 rounded-xl border border-outline-variant hover:bg-surface-variant/50 transition-colors relative overflow-hidden">
+            <div className="absolute -bottom-6 -right-6 text-8xl md:text-9xl opacity-[0.04] pointer-events-none select-none animate-float-1">
+              ⚽
+            </div>
+            <div className="absolute -top-4 -left-4 text-6xl md:text-7xl opacity-[0.03] pointer-events-none select-none animate-float-3 rotate-45">
+              ⚽
+            </div>
+            <div className="absolute top-1/2 right-4 w-24 h-24 md:w-32 md:h-32 rounded-full border-2 border-primary/5 pointer-events-none animate-pulse" />
             <h3 className="text-sm md:text-headline-md md:font-headline-md text-on-surface mb-1">Start Here</h3>
             <p className="text-xs md:text-label-md md:font-label-md text-outline mb-3 md:mb-4">Ready to build the bracket?</p>
-            <Link href="/group-stage" className="inline-block bg-primary-container text-on-primary-container px-3 py-1.5 md:px-4 md:py-2 rounded-lg text-xs md:text-label-md md:font-label-md hover:scale-105 transition-transform">
+            <Link href="/group-stage" className="inline-block bg-primary-container text-on-primary-container px-3 py-1.5 md:px-4 md:py-2 rounded-lg text-xs md:text-label-md md:font-label-md hover:scale-105 transition-transform relative z-10">
               Go to Group Stage
             </Link>
           </div>
