@@ -130,7 +130,7 @@ function PieChart({ data }: { data: { name: string; goals: number }[] }) {
         })}
         <circle cx={cx} cy={cy} r={r * 0.45} fill="#1e2023" />
       </svg>
-      <div className="flex-1 w-full space-y-1 max-h-32 overflow-y-auto pr-1">
+      <div className="flex-1 w-full space-y-1 max-h-48 overflow-y-auto pr-1">
         {segments.map((seg) => (
           <div
             key={seg.i}
