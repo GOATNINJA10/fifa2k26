@@ -133,11 +133,19 @@ function parseScorerDisplay(raw: string | null): string {
   if (!raw || raw === "null" || raw === "{}") return "";
   const normalized = raw.replace(/\u201c|\u201d/g, '"');
   const cleaned = normalized.replace(/^{|}$/g, "");
-  const parts = cleaned.split('","');
-  return parts
-    .map((s) => s.replace(/^"|"$/g, "").trim())
-    .filter(Boolean)
-    .join(", ");
+  const parts = cleaned.split('","').map(s => s.replace(/^"|"$/g, "").trim()).filter(Boolean);
+  const entries = parts.map(p => {
+    const idx = p.search(/\s+\d/);
+    if (idx === -1) return null;
+    return { name: p.slice(0, idx).trim(), minute: p.slice(idx).trim() };
+  }).filter(Boolean) as { name: string; minute: string }[];
+  const grouped = new Map<string, string[]>();
+  for (const e of entries) {
+    const existing = grouped.get(e.name) || [];
+    existing.push(e.minute);
+    grouped.set(e.name, existing);
+  }
+  return Array.from(grouped).map(([name, minutes]) => `${name} ${minutes.join(", ")}`).join("; ");
 }
 
   const grouped = useMemo(() => {
