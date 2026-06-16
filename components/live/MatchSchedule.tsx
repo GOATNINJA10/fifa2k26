@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { api, Match } from "@/lib/api";
+import { api, Match, GoalScorerEntry } from "@/lib/api";
 
 const STAGE_LABELS: Record<string, string> = {
   Group: "Group Stage",
@@ -42,6 +42,7 @@ export default function MatchSchedule() {
   const [matches, setMatches] = useState<Match[]>([]);
   const [liveMap, setLiveMap] = useState<Map<string, Partial<Match>>>(new Map());
   const [wcSchedule, setWcSchedule] = useState<Record<number, { dateTime: string; orderIndex: number }>>({});
+  const [goalScorers, setGoalScorers] = useState<GoalScorerEntry[]>([]);
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState<string | null>(null);
   const [liveSource, setLiveSource] = useState<"live" | "local">("local");
@@ -69,13 +70,15 @@ async function load() {
   setLoading(true);
   setLoadError(null);
   try {
-    const [data, live, schedule] = await Promise.all([
+    const [data, live, schedule, scorers] = await Promise.all([
       api.getMatches(),
       api.getLiveMatches().catch(() => null),
       api.getWcSchedule().catch(() => ({})),
+      api.getGoalScorers().catch(() => []),
     ]);
     setMatches(data);
     setWcSchedule(schedule);
+    setGoalScorers(scorers);
     if (live && live.source === "live" && live.matches.length > 0) {
       const map = new Map<string, Partial<Match>>();
       for (const m of live.matches) {
@@ -116,6 +119,26 @@ const mergedMatches = useMemo(() => {
     };
   });
 }, [matches, liveMap]);
+
+const scorerMap = useMemo(() => {
+  const map = new Map<string, GoalScorerEntry>();
+  for (const s of goalScorers) {
+    const key = `${normalizeName(s.homeTeam)}|${normalizeName(s.awayTeam)}`;
+    map.set(key, s);
+  }
+  return map;
+}, [goalScorers]);
+
+function parseScorerDisplay(raw: string | null): string {
+  if (!raw || raw === "null" || raw === "{}") return "";
+  const normalized = raw.replace(/\u201c|\u201d/g, '"');
+  const cleaned = normalized.replace(/^{|}$/g, "");
+  const parts = cleaned.split('","');
+  return parts
+    .map((s) => s.replace(/^"|"$/g, "").trim())
+    .filter(Boolean)
+    .join(", ");
+}
 
   const grouped = useMemo(() => {
     const map = new Map<string, Match[]>();
@@ -197,10 +220,13 @@ const mergedMatches = useMemo(() => {
                 const homeName = match.homeLabel || (match.homeTeam?.name ? match.homeTeam.name : match.stage || "");
                 const awayName = match.awayLabel || (match.awayTeam?.name ? match.awayTeam.name : match.stage || "");
                 const live = isInPlay(match);
+                const scorerKey = `${normalizeName(homeName)}|${normalizeName(awayName)}`;
+                const scorers = scorerMap.get(scorerKey);
+                const hasScorers = match.played && scorers && (scorers.homeScorers || scorers.awayScorers);
                 return (
                   <div
                     key={match.id}
-                    className={`flex items-center gap-3 md:gap-4 rounded-xl border px-3 py-2.5 md:px-5 md:py-3 transition-colors ${
+                    className={`rounded-xl border px-3 py-2.5 md:px-5 md:py-3 transition-colors ${
                       match.played
                         ? "bg-surface-container border-outline-variant"
                         : live
@@ -208,36 +234,45 @@ const mergedMatches = useMemo(() => {
                         : "bg-surface-container-low border-outline-variant/40"
                     }`}
                   >
-                    <span className="text-[10px] md:text-xs text-outline w-5 md:w-7 shrink-0 tabular-nums">{idx + 1}</span>
-                    <div className="hidden md:block w-20 shrink-0">
-                      <p className="text-[10px] text-outline font-medium">{formatDate(match.date, wcSchedule[match.id]?.dateTime)}</p>
-                      <p className="text-[10px] text-outline/60">{formatTime(match.date, wcSchedule[match.id]?.dateTime)}</p>
-                    </div>
-                    <div className="hidden md:block w-28 shrink-0 truncate">
-                      <p className="text-[10px] text-outline truncate">{match.venue || ""}</p>
-                    </div>
-                    <div className="flex-1 flex items-center justify-center gap-2 md:gap-4 min-w-0">
-                      <span className={`text-xs md:text-sm truncate text-right flex-1 ${match.played || live ? "text-on-surface font-semibold" : "text-on-surface-variant"}`}>
-                        {homeName}
-                      </span>
-                      <span className={`shrink-0 font-bold tabular-nums text-sm md:text-base min-w-[3ch] text-center ${
-                        match.played || live ? "text-secondary" : "text-outline"
+                    <div className="flex items-center gap-3 md:gap-4">
+                      <span className="text-[10px] md:text-xs text-outline w-5 md:w-7 shrink-0 tabular-nums">{idx + 1}</span>
+                      <div className="hidden md:block w-20 shrink-0">
+                        <p className="text-[10px] text-outline font-medium">{formatDate(match.date, wcSchedule[match.id]?.dateTime)}</p>
+                        <p className="text-[10px] text-outline/60">{formatTime(match.date, wcSchedule[match.id]?.dateTime)}</p>
+                      </div>
+                      <div className="hidden md:block w-28 shrink-0 truncate">
+                        <p className="text-[10px] text-outline truncate">{match.venue || ""}</p>
+                      </div>
+                      <div className="flex-1 flex items-center justify-center gap-2 md:gap-4 min-w-0">
+                        <span className={`text-xs md:text-sm truncate text-right flex-1 ${match.played || live ? "text-on-surface font-semibold" : "text-on-surface-variant"}`}>
+                          {homeName}
+                        </span>
+                        <span className={`shrink-0 font-bold tabular-nums text-sm md:text-base min-w-[3ch] text-center ${
+                          match.played || live ? "text-secondary" : "text-outline"
+                        }`}>
+                          {match.played || live ? `${match.homeGoals} - ${match.awayGoals}` : "vs"}
+                        </span>
+                        <span className={`text-xs md:text-sm truncate flex-1 ${match.played || live ? "text-on-surface font-semibold" : "text-on-surface-variant"}`}>
+                          {awayName}
+                        </span>
+                      </div>
+                      <span className={`shrink-0 text-[10px] px-1.5 py-0.5 rounded-full ${
+                        match.played
+                          ? "bg-primary-container/10 text-primary-container"
+                          : live
+                          ? "bg-red-900/30 text-red-400 animate-pulse"
+                          : "bg-surface-variant text-outline"
                       }`}>
-                        {match.played || live ? `${match.homeGoals} - ${match.awayGoals}` : "vs"}
-                      </span>
-                      <span className={`text-xs md:text-sm truncate flex-1 ${match.played || live ? "text-on-surface font-semibold" : "text-on-surface-variant"}`}>
-                        {awayName}
+                        {match.played ? "FT" : live ? "LIVE" : "UPCOMING"}
                       </span>
                     </div>
-                    <span className={`shrink-0 text-[10px] px-1.5 py-0.5 rounded-full ${
-                      match.played
-                        ? "bg-primary-container/10 text-primary-container"
-                        : live
-                        ? "bg-red-900/30 text-red-400 animate-pulse"
-                        : "bg-surface-variant text-outline"
-                    }`}>
-                      {match.played ? "FT" : live ? "LIVE" : "UPCOMING"}
-                    </span>
+                    {hasScorers && (
+                      <div className="flex justify-center gap-4 md:gap-8 mt-1.5 text-[10px] md:text-xs text-outline">
+                        <div className="text-right w-[35%] md:w-[40%]">{parseScorerDisplay(scorers.homeScorers)}</div>
+                        <div className="w-[20%] md:w-[20%]" />
+                        <div className="text-left w-[35%] md:w-[40%]">{parseScorerDisplay(scorers.awayScorers)}</div>
+                      </div>
+                    )}
                   </div>
                 );
               })}

@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
-import { api, Match, Player, Team } from "@/lib/api";
+import { api, Match, Player, Team, GoalScorerEntry } from "@/lib/api";
 
 function scoreText(match: Match) {
   return `${match.homeGoals} - ${match.awayGoals}`;
@@ -154,6 +154,7 @@ export default function LiveDashboard() {
   const [matches, setMatches] = useState<Match[]>([]);
   const [liveSource, setLiveSource] = useState<"live" | "local">("local");
   const [topScorers, setTopScorers] = useState<Player[]>([]);
+  const [goalScorers, setGoalScorers] = useState<GoalScorerEntry[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -161,14 +162,16 @@ export default function LiveDashboard() {
     setLoading(true);
     setError(null);
     try {
-      const [teamData, matchData, scorerData] = await Promise.all([
+      const [teamData, matchData, scorerData, goalScorerData] = await Promise.all([
         api.getTeams(),
         api.getMatches(),
         api.getTopScorers(),
+        api.getGoalScorers(),
       ]);
       setTeams(teamData);
       setMatches(matchData);
       setTopScorers(scorerData.data);
+      setGoalScorers(goalScorerData);
 
       const live = await api.getLiveMatches();
       if (live.source === "live" && live.matches.length > 0) {
@@ -204,6 +207,26 @@ export default function LiveDashboard() {
   function localName(apiName: string | null | undefined) {
     const n = normalizeName(apiName);
     return n ? teamNameMap.get(n) || apiName || "" : "";
+  }
+
+  const scorerMap = useMemo(() => {
+    const map = new Map<string, GoalScorerEntry>();
+    for (const s of goalScorers) {
+      const key = `${normalizeName(s.homeTeam)}|${normalizeName(s.awayTeam)}`;
+      map.set(key, s);
+    }
+    return map;
+  }, [goalScorers]);
+
+  function parseScorerDisplay(raw: string | null): string {
+    if (!raw || raw === "null" || raw === "{}") return "";
+    const normalized = raw.replace(/\u201c|\u201d/g, '"');
+    const cleaned = normalized.replace(/^{|}$/g, "");
+    const parts = cleaned.split('","');
+    return parts
+      .map((s) => s.replace(/^"|"$/g, "").trim())
+      .filter(Boolean)
+      .join(", ");
   }
 
   const confederationMap = useMemo(() => {
@@ -393,20 +416,31 @@ export default function LiveDashboard() {
               const awayWon = match.awayGoals > match.homeGoals;
               const homeName = match.homeLabel || localName(match.homeTeam?.name) || match.stage || "";
               const awayName = match.awayLabel || localName(match.awayTeam?.name) || match.stage || "";
+              const scorerKey = `${normalizeName(homeName)}|${normalizeName(awayName)}`;
+              const scorers = scorerMap.get(scorerKey);
               return (
-                <div key={match.id} className="bg-surface p-2 md:p-4 rounded-lg border border-outline-variant flex justify-between items-center hover:border-primary/50 transition-colors">
-                  <div className="flex flex-col items-end w-[35%] md:w-[40%]">
-                    <span className={`text-xs md:text-body-md md:font-body-md font-semibold truncate max-w-full ${homeWon ? "text-green-400" : "text-on-surface"}`}>{homeName}</span>
-                    <span className="text-[10px] md:text-label-md md:font-label-md text-outline">{match.stage}</span>
+                <div key={match.id} className="bg-surface p-2 md:p-4 rounded-lg border border-outline-variant hover:border-primary/50 transition-colors">
+                  <div className="flex justify-between items-center">
+                    <div className="flex flex-col items-end w-[35%] md:w-[40%]">
+                      <span className={`text-xs md:text-body-md md:font-body-md font-semibold truncate max-w-full ${homeWon ? "text-green-400" : "text-on-surface"}`}>{homeName}</span>
+                      <span className="text-[10px] md:text-label-md md:font-label-md text-outline">{match.stage}</span>
+                    </div>
+                    <div className="flex flex-col items-center px-1 md:px-2 w-[20%] md:w-[20%]">
+                      <span className="text-sm md:text-headline-md md:font-headline-md text-secondary whitespace-nowrap">{scoreText(match)}</span>
+                      <span className="text-[10px] md:text-tabular-nums md:font-tabular-nums text-on-surface-variant">FT</span>
+                    </div>
+                    <div className="flex flex-col items-start w-[35%] md:w-[40%]">
+                      <span className={`text-xs md:text-body-md md:font-body-md font-semibold truncate max-w-full ${awayWon ? "text-green-400" : "text-on-surface"}`}>{awayName}</span>
+                      <span className="text-[10px] md:text-label-md md:font-label-md text-outline truncate max-w-full">{match.venue || ""}</span>
+                    </div>
                   </div>
-                  <div className="flex flex-col items-center px-1 md:px-2 w-[20%] md:w-[20%]">
-                    <span className="text-sm md:text-headline-md md:font-headline-md text-secondary whitespace-nowrap">{scoreText(match)}</span>
-                    <span className="text-[10px] md:text-tabular-nums md:font-tabular-nums text-on-surface-variant">FT</span>
-                  </div>
-                  <div className="flex flex-col items-start w-[35%] md:w-[40%]">
-                    <span className={`text-xs md:text-body-md md:font-body-md font-semibold truncate max-w-full ${awayWon ? "text-green-400" : "text-on-surface"}`}>{awayName}</span>
-                    <span className="text-[10px] md:text-label-md md:font-label-md text-outline truncate max-w-full">{match.venue || ""}</span>
-                  </div>
+                  {scorers && (scorers.homeScorers || scorers.awayScorers) && (
+                    <div className="flex justify-center gap-4 md:gap-8 mt-1.5 text-[10px] md:text-xs text-outline">
+                      <div className="text-right w-[35%] md:w-[40%]">{parseScorerDisplay(scorers.homeScorers)}</div>
+                      <div className="w-[20%] md:w-[20%]" />
+                      <div className="text-left w-[35%] md:w-[40%]">{parseScorerDisplay(scorers.awayScorers)}</div>
+                    </div>
+                  )}
                 </div>
               );
             })}

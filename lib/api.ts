@@ -94,6 +94,13 @@ export type StandingsResponse = {
   data: StandingsGroup[];
 };
 
+export type GoalScorerEntry = {
+  homeTeam: string;
+  awayTeam: string;
+  homeScorers: string | null;
+  awayScorers: string | null;
+};
+
 async function fetchJson<T>(path: string, init?: RequestInit): Promise<T> {
   const response = await fetch(`${API_BASE_URL}${path}`, {
     cache: "no-store",
@@ -130,4 +137,5 @@ export const api = {
   getAssistLeaders: () => fetchJson<StatsResponse>("/stats/assist-leaders"),
   getStandings: () => fetchJson<StandingsResponse>("/stats/standings"),
   getWcSchedule: () => fetchJson<Record<number, { dateTime: string; orderIndex: number }>>("/matches/wc-schedule"),
+  getGoalScorers: () => fetchJson<GoalScorerEntry[]>("/matches/goal-scorers"),
 };
