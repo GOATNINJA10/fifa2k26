@@ -56,6 +56,7 @@ function normalizeName(name: string | null | undefined) {
     "cape verde islands": "cape verde",
     "curacao": "curacao",
     "korea republic": "south korea",
+    "congo dr": "dr congo",
   };
   const n = name
     .toLowerCase()

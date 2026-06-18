@@ -33,7 +33,10 @@ function normalizeName(name: string | null | undefined) {
     "czech republic": "czechia",
     "bosnia and herzegovina": "bosnia-herzegovina",
     "türkiye": "turkey",
+    "cape verde islands": "cape verde",
     "curacao": "curacao",
+    "korea republic": "south korea",
+    "congo dr": "dr congo",
   };
   const n = name
     .toLowerCase()
