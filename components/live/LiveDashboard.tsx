@@ -216,8 +216,9 @@ export default function LiveDashboard() {
 
   useEffect(() => {
     if (!nextMatch) return;
+    const nm = nextMatch;
     function tick() {
-      const diff = new Date(nextMatch.date).getTime() - Date.now();
+      const diff = new Date(nm.date).getTime() - Date.now();
       if (diff <= 0) { setCountdown("Starting soon"); return; }
       const days = Math.floor(diff / 86400000);
       const hours = Math.floor((diff % 86400000) / 3600000);
