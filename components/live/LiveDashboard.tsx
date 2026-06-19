@@ -200,23 +200,22 @@ export default function LiveDashboard() {
 
   const [countdown, setCountdown] = useState("");
 
-  const nextMatch = useMemo(() => {
+  const nextMatches = useMemo(() => {
     const upcoming = matches
       .filter((m) => !m.played && m.status !== "IN_PLAY" && m.status !== "PAUSED" && m.status !== "LIVE" && m.date)
-      .sort((a, b) => (a.date ?? "").localeCompare(b.date ?? ""));
-    if (upcoming.length === 0) return null;
-    const m = upcoming[0];
-    return {
+      .sort((a, b) => (a.date ?? "").localeCompare(b.date ?? ""))
+      .slice(0, 5);
+    return upcoming.map((m) => ({
       homeName: m.homeLabel || (m.homeTeam?.name ?? ""),
       awayName: m.awayLabel || (m.awayTeam?.name ?? ""),
       venue: m.venue || m.stage || "",
       date: m.date ?? "",
-    };
+    }));
   }, [matches]);
 
   useEffect(() => {
-    if (!nextMatch) return;
-    const nm = nextMatch;
+    if (nextMatches.length === 0) return;
+    const nm = nextMatches[0];
     function tick() {
       const diff = new Date(nm.date).getTime() - Date.now();
       if (diff <= 0) { setCountdown("Starting soon"); return; }
@@ -230,7 +229,7 @@ export default function LiveDashboard() {
     tick();
     const interval = setInterval(tick, 30000);
     return () => clearInterval(interval);
-  }, [nextMatch]);
+  }, [nextMatches]);
 
   const teamNameMap = useMemo(() => {
     const map = new Map<string, string>();
@@ -393,11 +392,19 @@ export default function LiveDashboard() {
             <div className="absolute top-2/3 right-6 text-lg md:text-xl opacity-[0.04] pointer-events-none select-none animate-float-3" style={{ animationDelay: "1s" }}>⚽</div>
             <div className="absolute top-1/2 left-1/2 text-xs md:text-sm opacity-[0.03] pointer-events-none select-none animate-float-1" style={{ animationDelay: "3s" }}>⚽</div>
             <h3 className="text-sm md:text-headline-md md:font-headline-md text-on-surface mb-1">Next Match</h3>
-            {nextMatch ? (
-              <div className="relative z-10">
-                <p className="text-xs md:text-label-md md:font-label-md text-outline mb-1">{nextMatch.homeName} vs {nextMatch.awayName}</p>
-                <p className="text-lg md:text-headline-md md:font-headline-md text-secondary font-bold tabular-nums">{countdown}</p>
-                <p className="text-[10px] md:text-xs text-outline mt-0.5">{nextMatch.venue}</p>
+            {nextMatches.length > 0 ? (
+              <div className="relative z-10 space-y-2">
+                <div className="bg-primary/5 p-2 rounded-lg border border-primary/10">
+                  <p className="text-xs md:text-label-md md:font-label-md text-outline mb-0.5">{nextMatches[0].homeName} vs {nextMatches[0].awayName}</p>
+                  <p className="text-lg md:text-headline-md md:font-headline-md text-secondary font-bold tabular-nums">{countdown}</p>
+                  <p className="text-[10px] md:text-xs text-outline mt-0.5">{nextMatches[0].venue}</p>
+                </div>
+                {nextMatches.slice(1).map((m, i) => (
+                  <div key={i} className="flex items-center justify-between text-[10px] md:text-xs text-outline">
+                    <span className="truncate flex-1 min-w-0">{m.homeName} vs {m.awayName}</span>
+                    <span className="shrink-0 ml-2">{m.venue}</span>
+                  </div>
+                ))}
               </div>
             ) : (
               <div className="relative z-10">
