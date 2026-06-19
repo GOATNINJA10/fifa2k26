@@ -391,18 +391,41 @@ export default function LiveDashboard() {
             <div className="absolute top-1/3 left-3 text-base md:text-lg opacity-[0.05] pointer-events-none select-none animate-float-2" style={{ animationDelay: "4s" }}>⚽</div>
             <div className="absolute top-2/3 right-6 text-lg md:text-xl opacity-[0.04] pointer-events-none select-none animate-float-3" style={{ animationDelay: "1s" }}>⚽</div>
             <div className="absolute top-1/2 left-1/2 text-xs md:text-sm opacity-[0.03] pointer-events-none select-none animate-float-1" style={{ animationDelay: "3s" }}>⚽</div>
-            <h3 className="text-sm md:text-headline-md md:font-headline-md text-on-surface mb-1">Next Match</h3>
+            <h3 className="text-sm md:text-headline-md md:font-headline-md text-on-surface mb-2">Next Match</h3>
             {nextMatches.length > 0 ? (
-              <div className="relative z-10 space-y-2">
-                <div className="bg-primary/5 p-2 rounded-lg border border-primary/10">
-                  <p className="text-xs md:text-label-md md:font-label-md text-outline mb-0.5">{nextMatches[0].homeName} vs {nextMatches[0].awayName}</p>
-                  <p className="text-lg md:text-headline-md md:font-headline-md text-secondary font-bold tabular-nums">{countdown}</p>
-                  <p className="text-[10px] md:text-xs text-outline mt-0.5">{nextMatches[0].venue}</p>
+              <div className="relative z-10 space-y-1.5">
+                <div className="bg-primary/10 p-2 md:p-4 rounded-lg border border-primary/30">
+                  <div className="flex justify-between items-center">
+                    <div className="flex flex-col items-end w-[35%] md:w-[40%]">
+                      <span className="text-xs md:text-body-md md:font-body-md font-semibold truncate max-w-full text-on-surface">{nextMatches[0].homeName}</span>
+                      <span className="text-[10px] md:text-label-md md:font-label-md text-outline">{nextMatches[0].venue}</span>
+                    </div>
+                    <div className="flex flex-col items-center px-1 md:px-2 w-[20%] md:w-[20%]">
+                      <span className="text-sm md:text-headline-md md:font-headline-md text-secondary font-bold tabular-nums whitespace-nowrap">{countdown}</span>
+                      <span className="text-[10px] md:text-tabular-nums md:font-tabular-nums text-outline">starts in</span>
+                    </div>
+                    <div className="flex flex-col items-start w-[35%] md:w-[40%]">
+                      <span className="text-xs md:text-body-md md:font-body-md font-semibold truncate max-w-full text-on-surface">{nextMatches[0].awayName}</span>
+                      <span className="text-[10px] md:text-label-md md:font-label-md text-outline truncate max-w-full">{new Date(nextMatches[0].date).toLocaleDateString("en-IN", { month: "short", day: "numeric", timeZone: "Asia/Kolkata" })}</span>
+                    </div>
+                  </div>
                 </div>
                 {nextMatches.slice(1).map((m, i) => (
-                  <div key={i} className="flex items-center justify-between text-[10px] md:text-xs text-outline">
-                    <span className="truncate flex-1 min-w-0">{m.homeName} vs {m.awayName}</span>
-                    <span className="shrink-0 ml-2">{m.venue}</span>
+                  <div key={i} className="bg-surface p-1.5 md:p-2 rounded-lg border border-outline-variant/40 hover:border-outline-variant transition-colors">
+                    <div className="flex justify-between items-center">
+                      <div className="flex flex-col items-end w-[35%] md:w-[40%]">
+                        <span className="text-[10px] md:text-xs font-medium truncate max-w-full text-on-surface">{m.homeName}</span>
+                      </div>
+                      <div className="flex flex-col items-center px-1 w-[20%] md:w-[20%]">
+                        <span className="text-[10px] md:text-xs text-secondary font-medium tabular-nums">vs</span>
+                      </div>
+                      <div className="flex flex-col items-start w-[35%] md:w-[40%]">
+                        <span className="text-[10px] md:text-xs font-medium truncate max-w-full text-on-surface">{m.awayName}</span>
+                      </div>
+                    </div>
+                    <div className="flex justify-center text-[9px] md:text-[10px] text-outline mt-0.5">
+                      {new Date(m.date).toLocaleDateString("en-IN", { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit", timeZone: "Asia/Kolkata" })} IST
+                    </div>
                   </div>
                 ))}
               </div>
