@@ -266,7 +266,7 @@ export default function LiveDashboard() {
   }, [playedMatches, confederationMap]);
 
   const recentResults = useMemo(
-    () => playedMatches.slice().sort((a, b) => (b.matchNumber ?? b.id) - (a.matchNumber ?? a.id)).slice(0, 5),
+    () => playedMatches.slice().sort((a, b) => (b.date ?? "").localeCompare(a.date ?? "")).slice(0, 5),
     [playedMatches]
   );
 
