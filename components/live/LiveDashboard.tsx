@@ -350,7 +350,7 @@ export default function LiveDashboard() {
             </div>
           </div>
 
-          <div className="glass-panel p-4 md:p-6 rounded-xl border border-outline-variant hover:bg-surface-variant/50 transition-colors relative overflow-hidden">
+          <div className="glass-panel p-4 md:p-6 rounded-xl border border-outline-variant hover:bg-surface-variant/50 transition-colors relative overflow-hidden self-start">
             <div className="absolute top-2 left-6 text-lg md:text-xl opacity-[0.06] pointer-events-none select-none animate-float-1">⚽</div>
             <div className="absolute top-8 right-8 text-base md:text-lg opacity-[0.05] pointer-events-none select-none animate-float-2">⚽</div>
             <div className="absolute bottom-8 left-10 text-xl md:text-2xl opacity-[0.06] pointer-events-none select-none animate-float-3">⚽</div>
