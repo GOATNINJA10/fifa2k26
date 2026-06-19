@@ -198,6 +198,39 @@ export default function LiveDashboard() {
   const inPlayMatches = liveSource === "live" ? matches.filter((match) => match.status === "IN_PLAY" || match.status === "PAUSED" || match.status === "LIVE") : [];
   const totalGoals = playedMatches.reduce((sum, match) => sum + match.homeGoals + match.awayGoals, 0);
 
+  const [countdown, setCountdown] = useState("");
+
+  const nextMatch = useMemo(() => {
+    const upcoming = matches
+      .filter((m) => !m.played && m.status !== "IN_PLAY" && m.status !== "PAUSED" && m.status !== "LIVE" && m.date)
+      .sort((a, b) => (a.date ?? "").localeCompare(b.date ?? ""));
+    if (upcoming.length === 0) return null;
+    const m = upcoming[0];
+    return {
+      homeName: m.homeLabel || (m.homeTeam?.name ?? ""),
+      awayName: m.awayLabel || (m.awayTeam?.name ?? ""),
+      venue: m.venue || m.stage || "",
+      date: m.date ?? "",
+    };
+  }, [matches]);
+
+  useEffect(() => {
+    if (!nextMatch) return;
+    function tick() {
+      const diff = new Date(nextMatch.date).getTime() - Date.now();
+      if (diff <= 0) { setCountdown("Starting soon"); return; }
+      const days = Math.floor(diff / 86400000);
+      const hours = Math.floor((diff % 86400000) / 3600000);
+      const minutes = Math.floor((diff % 3600000) / 60000);
+      if (days > 0) setCountdown(`${days}d ${hours}h`);
+      else if (hours > 0) setCountdown(`${hours}h ${minutes}m`);
+      else setCountdown(`${minutes}m`);
+    }
+    tick();
+    const interval = setInterval(tick, 30000);
+    return () => clearInterval(interval);
+  }, [nextMatch]);
+
   const teamNameMap = useMemo(() => {
     const map = new Map<string, string>();
     for (const t of teams) {
@@ -358,11 +391,21 @@ export default function LiveDashboard() {
             <div className="absolute top-1/3 left-3 text-base md:text-lg opacity-[0.05] pointer-events-none select-none animate-float-2" style={{ animationDelay: "4s" }}>⚽</div>
             <div className="absolute top-2/3 right-6 text-lg md:text-xl opacity-[0.04] pointer-events-none select-none animate-float-3" style={{ animationDelay: "1s" }}>⚽</div>
             <div className="absolute top-1/2 left-1/2 text-xs md:text-sm opacity-[0.03] pointer-events-none select-none animate-float-1" style={{ animationDelay: "3s" }}>⚽</div>
-            <h3 className="text-sm md:text-headline-md md:font-headline-md text-on-surface mb-1">Start Here</h3>
-            <p className="text-xs md:text-label-md md:font-label-md text-outline mb-3 md:mb-4">Ready to build the bracket?</p>
-            <Link href="/group-stage" className="inline-block bg-primary-container text-on-primary-container px-3 py-1.5 md:px-4 md:py-2 rounded-lg text-xs md:text-label-md md:font-label-md hover:scale-105 transition-transform relative z-10">
-              Go to Group Stage
-            </Link>
+            <h3 className="text-sm md:text-headline-md md:font-headline-md text-on-surface mb-1">Next Match</h3>
+            {nextMatch ? (
+              <div className="relative z-10">
+                <p className="text-xs md:text-label-md md:font-label-md text-outline mb-1">{nextMatch.homeName} vs {nextMatch.awayName}</p>
+                <p className="text-lg md:text-headline-md md:font-headline-md text-secondary font-bold tabular-nums">{countdown}</p>
+                <p className="text-[10px] md:text-xs text-outline mt-0.5">{nextMatch.venue || nextMatch.stage || ""}</p>
+              </div>
+            ) : (
+              <div className="relative z-10">
+                <p className="text-xs md:text-label-md md:font-label-md text-outline mb-3 md:mb-4">Ready to build the bracket?</p>
+                <Link href="/group-stage" className="inline-block bg-primary-container text-on-primary-container px-3 py-1.5 md:px-4 md:py-2 rounded-lg text-xs md:text-label-md md:font-label-md hover:scale-105 transition-transform">
+                  Go to Group Stage
+                </Link>
+              </div>
+            )}
           </div>
 
           <div className="glass-panel p-4 md:p-6 rounded-xl border border-outline-variant flex flex-col items-center">
