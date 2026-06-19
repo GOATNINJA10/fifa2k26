@@ -397,7 +397,7 @@ export default function LiveDashboard() {
               <div className="relative z-10">
                 <p className="text-xs md:text-label-md md:font-label-md text-outline mb-1">{nextMatch.homeName} vs {nextMatch.awayName}</p>
                 <p className="text-lg md:text-headline-md md:font-headline-md text-secondary font-bold tabular-nums">{countdown}</p>
-                <p className="text-[10px] md:text-xs text-outline mt-0.5">{nextMatch.venue || nextMatch.stage || ""}</p>
+                <p className="text-[10px] md:text-xs text-outline mt-0.5">{nextMatch.venue}</p>
               </div>
             ) : (
               <div className="relative z-10">
