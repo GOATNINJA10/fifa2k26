@@ -88,8 +88,8 @@ function PieChart({ data }: { data: { name: string; goals: number }[] }) {
   });
 
   return (
-    <div className="flex flex-col md:flex-row items-center gap-3 mt-2">
-      <svg viewBox="0 0 200 200" className="w-32 h-32 md:w-40 md:h-40 shrink-0">
+    <div className="flex flex-col items-center gap-4 mt-2">
+      <svg viewBox="0 0 200 200" className="w-48 h-48 md:w-56 md:h-56">
         {segments.map((seg) => {
           const scale = hovered === seg.i ? 1.05 : 1;
           const tx = cx * (1 - scale);
@@ -133,7 +133,7 @@ function PieChart({ data }: { data: { name: string; goals: number }[] }) {
         })}
         <circle cx={cx} cy={cy} r={r * 0.45} fill="#1e2023" />
       </svg>
-      <div className="flex-1 w-full space-y-1 max-h-48 overflow-y-auto pr-1">
+      <div className="w-full max-w-xs space-y-1 max-h-48 overflow-y-auto pr-1">
         {segments.map((seg) => (
           <div
             key={seg.i}
@@ -365,8 +365,8 @@ export default function LiveDashboard() {
             </Link>
           </div>
 
-          <div className="glass-panel p-4 md:p-6 rounded-xl border border-outline-variant flex flex-col">
-            <div>
+          <div className="glass-panel p-4 md:p-6 rounded-xl border border-outline-variant flex flex-col items-center">
+            <div className="text-center">
               <h3 className="text-sm md:text-headline-md md:font-headline-md text-on-surface mb-1">Goals by Confederation</h3>
               <p className="text-xs md:text-label-md md:font-label-md text-outline">{goalsByConfederation.length ? `${goalsByConfederation.length} confederations scored` : "No goals yet"}</p>
             </div>
