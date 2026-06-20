@@ -245,9 +245,10 @@ function parseScorerDisplay(raw: string | null): string {
                   >
                     <div className="flex items-center gap-3 md:gap-4">
                       <span className="text-[10px] md:text-xs text-outline w-5 md:w-7 shrink-0 tabular-nums">{idx + 1}</span>
-                      <div className="hidden md:block w-20 shrink-0">
-                        <p className="text-[10px] text-outline font-medium">{formatDate(match.date, wcSchedule[match.id]?.dateTime)}</p>
-                        <p className="text-[10px] text-outline/60">{formatTime(match.date, wcSchedule[match.id]?.dateTime)}</p>
+                      <div className="w-16 md:w-20 shrink-0">
+                        <p className="text-[9px] md:text-[10px] text-outline font-medium leading-tight">{formatDate(match.date, wcSchedule[match.id]?.dateTime)}</p>
+                        <p className="text-[9px] md:text-[10px] text-outline/60 leading-tight">{formatTime(match.date, wcSchedule[match.id]?.dateTime)}</p>
+                        <p className="block md:hidden text-[8px] text-outline/40 leading-tight truncate">{match.venue || ""}</p>
                       </div>
                       <div className="hidden md:block w-28 shrink-0 truncate">
                         <p className="text-[10px] text-outline truncate">{match.venue || ""}</p>
