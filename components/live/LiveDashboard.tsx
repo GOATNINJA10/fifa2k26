@@ -32,7 +32,7 @@ function normalizeName(name: string | null | undefined) {
   const map: Record<string, string> = {
     "czech republic": "czechia",
     "bosnia and herzegovina": "bosnia-herzegovina",
-    "türkiye": "turkey",
+    "turkiye": "turkey",
     "cape verde islands": "cape verde",
     "curacao": "curacao",
     "korea republic": "south korea",
