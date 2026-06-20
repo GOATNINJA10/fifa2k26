@@ -395,16 +395,16 @@ export default function LiveDashboard() {
             {nextMatches.length > 0 ? (
               <div className="relative z-10 space-y-1.5">
                 <div className="bg-primary/10 p-2 md:p-4 rounded-lg border border-primary/30">
-                  <div className="flex justify-between items-center">
-                    <div className="flex flex-col items-end w-[35%] md:w-[40%]">
+                  <div className="flex justify-between items-center gap-3 md:gap-4">
+                    <div className="flex flex-col items-end flex-1 min-w-0">
                       <span className="text-xs md:text-body-md md:font-body-md font-semibold truncate max-w-full text-on-surface">{nextMatches[0].homeName}</span>
                       <span className="text-[10px] md:text-label-md md:font-label-md text-outline">{nextMatches[0].venue}</span>
                     </div>
-                    <div className="flex flex-col items-center px-1 md:px-2 w-[20%] md:w-[20%]">
+                    <div className="flex flex-col items-center shrink-0">
                       <span className="text-sm md:text-headline-md md:font-headline-md text-secondary font-bold tabular-nums whitespace-nowrap">{countdown}</span>
                       <span className="text-[10px] md:text-tabular-nums md:font-tabular-nums text-outline">starts in</span>
                     </div>
-                    <div className="flex flex-col items-start w-[35%] md:w-[40%]">
+                    <div className="flex flex-col items-start flex-1 min-w-0">
                       <span className="text-xs md:text-body-md md:font-body-md font-semibold truncate max-w-full text-on-surface">{nextMatches[0].awayName}</span>
                       <span className="text-[10px] md:text-label-md md:font-label-md text-outline truncate max-w-full">{new Date(nextMatches[0].date).toLocaleDateString("en-IN", { month: "short", day: "numeric", timeZone: "Asia/Kolkata" })}</span>
                     </div>
@@ -412,14 +412,14 @@ export default function LiveDashboard() {
                 </div>
                 {nextMatches.slice(1).map((m, i) => (
                   <div key={i} className="bg-surface p-1.5 md:p-2 rounded-lg border border-outline-variant/40 hover:border-outline-variant transition-colors">
-                    <div className="flex justify-between items-center">
-                      <div className="flex flex-col items-end w-[35%] md:w-[40%]">
+                    <div className="flex justify-between items-center gap-3 md:gap-4">
+                      <div className="flex flex-col items-end flex-1 min-w-0">
                         <span className="text-[10px] md:text-xs font-medium truncate max-w-full text-on-surface">{m.homeName}</span>
                       </div>
-                      <div className="flex flex-col items-center px-1 w-[20%] md:w-[20%]">
+                      <div className="flex flex-col items-center shrink-0">
                         <span className="text-[10px] md:text-xs text-secondary font-medium tabular-nums">vs</span>
                       </div>
-                      <div className="flex flex-col items-start w-[35%] md:w-[40%]">
+                      <div className="flex flex-col items-start flex-1 min-w-0">
                         <span className="text-[10px] md:text-xs font-medium truncate max-w-full text-on-surface">{m.awayName}</span>
                       </div>
                     </div>
