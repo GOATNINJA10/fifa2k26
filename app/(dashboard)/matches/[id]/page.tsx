@@ -79,8 +79,12 @@ export default function MatchDetailPage() {
             )}
             <div className="flex items-center justify-center gap-4 md:gap-12 w-full max-w-2xl mx-auto">
               <div className="flex flex-col items-center flex-1 text-right">
-                <div className="w-14 h-14 md:w-20 md:h-20 rounded-full bg-surface-container-high flex items-center justify-center text-lg md:text-2xl text-on-surface font-bold mb-1 md:mb-2 border border-outline-variant">
-                  {homeName.charAt(0)}
+                <div className="w-14 h-14 md:w-20 md:h-20 rounded-full bg-surface-container-high flex items-center justify-center overflow-hidden mb-1 md:mb-2 border border-outline-variant">
+                  {match.homeTeam?.flagUrl ? (
+                    <img src={match.homeTeam.flagUrl} alt={homeName} className="w-full h-full object-cover" />
+                  ) : (
+                    <span className="text-lg md:text-2xl text-on-surface font-bold">{homeName.charAt(0)}</span>
+                  )}
                 </div>
                 <h2 className="text-sm md:text-headline-md md:font-headline-md text-on-surface font-semibold">{homeName}</h2>
               </div>
@@ -96,8 +100,12 @@ export default function MatchDetailPage() {
                 )}
               </div>
               <div className="flex flex-col items-center flex-1 text-left">
-                <div className="w-14 h-14 md:w-20 md:h-20 rounded-full bg-surface-container-high flex items-center justify-center text-lg md:text-2xl text-on-surface font-bold mb-1 md:mb-2 border border-outline-variant">
-                  {awayName.charAt(0)}
+                <div className="w-14 h-14 md:w-20 md:h-20 rounded-full bg-surface-container-high flex items-center justify-center overflow-hidden mb-1 md:mb-2 border border-outline-variant">
+                  {match.awayTeam?.flagUrl ? (
+                    <img src={match.awayTeam.flagUrl} alt={awayName} className="w-full h-full object-cover" />
+                  ) : (
+                    <span className="text-lg md:text-2xl text-on-surface font-bold">{awayName.charAt(0)}</span>
+                  )}
                 </div>
                 <h2 className="text-sm md:text-headline-md md:font-headline-md text-on-surface font-semibold">{awayName}</h2>
               </div>
