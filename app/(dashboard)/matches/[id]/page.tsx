@@ -39,20 +39,21 @@ export default function MatchDetailPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-900 flex items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500" />
-      </div>
+      <main className="flex-1 p-4 md:p-8 flex items-center justify-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-container" />
+      </main>
     );
   }
 
   if (error || !match) {
     return (
-      <div className="min-h-screen bg-gray-900 flex flex-col items-center justify-center gap-4">
-        <p className="text-red-400 text-lg">{error || "Match not found"}</p>
-        <Link href="/" className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
+      <main className="flex-1 p-4 md:p-8 flex flex-col items-center justify-center gap-4">
+        <span className="material-symbols-outlined text-4xl text-error">error</span>
+        <p className="text-error font-headline-md">{error || "Match not found"}</p>
+        <Link href="/" className="bg-primary-container text-on-primary-container px-6 py-2 rounded-lg font-label-md hover:scale-105 transition-transform">
           Back to Dashboard
         </Link>
-      </div>
+      </main>
     );
   }
 
@@ -63,57 +64,63 @@ export default function MatchDetailPage() {
   const played = match.liveScore?.played ?? match.played;
 
   return (
-    <div className="min-h-screen bg-gray-900 text-white">
-      <div className="bg-gradient-to-r from-blue-900 to-purple-900 py-6">
-        <div className="max-w-4xl mx-auto px-4">
-          <Link href="/" className="text-blue-300 hover:text-white text-sm mb-4 inline-block">
-            &larr; Back to Dashboard
+    <main className="flex-1">
+      <div className="relative w-full overflow-hidden border-b border-outline-variant glass-panel flex items-end p-4 md:min-h-80 md:p-8">
+        <span className="material-symbols-outlined absolute top-[10%] left-[8%] text-4xl md:text-5xl text-primary-container/55 animate-float-1">sports_soccer</span>
+        <span className="material-symbols-outlined absolute bottom-[30%] right-[15%] text-2xl md:text-3xl text-primary-container/40 animate-float-2" style={{ animationDelay: "-3s" }}>sports_soccer</span>
+        <span className="material-symbols-outlined absolute top-[60%] left-[60%] text-xl md:text-2xl text-primary-container/35 animate-float-3" style={{ animationDelay: "-5s" }}>sports_soccer</span>
+        <div className="flex flex-col w-full relative z-10">
+          <Link href="/" className="text-primary-container hover:text-primary text-sm font-label-md mb-2 flex items-center gap-1">
+            <span className="material-symbols-outlined text-base">arrow_back</span>
+            Back
           </Link>
-
-          <div className="flex flex-col items-center gap-2 mt-4">
+          <div className="flex flex-col items-center gap-2 mt-2">
             {match.stage && (
-              <span className="text-xs uppercase tracking-widest text-blue-300">{match.stage.replace(/([A-Z])/g, " $1").trim() || match.stage}</span>
+              <span className="text-xs uppercase tracking-widest text-outline">{match.stage.replace(/([A-Z])/g, " $1").trim() || match.stage}</span>
             )}
-            <div className="flex items-center justify-center gap-6 md:gap-12 w-full">
+            <div className="flex items-center justify-center gap-4 md:gap-12 w-full max-w-2xl mx-auto">
               <div className="flex flex-col items-center flex-1 text-right">
-                <div className="w-16 h-16 md:w-20 md:h-20 rounded-full bg-gray-700 flex items-center justify-center text-2xl mb-2">
+                <div className="w-14 h-14 md:w-20 md:h-20 rounded-full bg-surface-container-high flex items-center justify-center text-lg md:text-2xl text-on-surface font-bold mb-1 md:mb-2 border border-outline-variant">
                   {homeName.charAt(0)}
                 </div>
-                <h2 className="text-lg md:text-2xl font-bold">{homeName}</h2>
+                <h2 className="text-sm md:text-headline-md md:font-headline-md text-on-surface font-semibold">{homeName}</h2>
               </div>
               <div className="flex flex-col items-center shrink-0">
-                <div className="text-5xl md:text-7xl font-extrabold tabular-nums">
+                <div className="text-4xl md:text-7xl font-extrabold tabular-nums text-secondary">
                   {played ? `${homeScore} - ${awayScore}` : "vs"}
                 </div>
-                <div className="text-xs text-blue-300 mt-2">{match.venue || "Venue TBD"}</div>
+                <div className="text-xs text-outline mt-1 md:mt-2">{match.venue || "Venue TBD"}</div>
                 {match.date && (
-                  <div className="text-xs text-gray-400 mt-1">
+                  <div className="text-[10px] md:text-xs text-outline/60 mt-0.5">
                     {formatDate(match.date)} • {formatTime(match.date)}
                   </div>
                 )}
               </div>
               <div className="flex flex-col items-center flex-1 text-left">
-                <div className="w-16 h-16 md:w-20 md:h-20 rounded-full bg-gray-700 flex items-center justify-center text-2xl mb-2">
+                <div className="w-14 h-14 md:w-20 md:h-20 rounded-full bg-surface-container-high flex items-center justify-center text-lg md:text-2xl text-on-surface font-bold mb-1 md:mb-2 border border-outline-variant">
                   {awayName.charAt(0)}
                 </div>
-                <h2 className="text-lg md:text-2xl font-bold">{awayName}</h2>
+                <h2 className="text-sm md:text-headline-md md:font-headline-md text-on-surface font-semibold">{awayName}</h2>
               </div>
             </div>
           </div>
         </div>
       </div>
 
-      <div className="max-w-4xl mx-auto px-4 py-8">
+      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-6 md:py-8 space-y-6">
         {match.goalTimeline.length > 0 && (
-          <section className="mb-8">
-            <h3 className="text-xl font-bold mb-4 text-blue-300">Goal Timeline</h3>
+          <section className="glass-panel p-4 md:p-6 rounded-xl border border-outline-variant">
+            <h3 className="font-headline-md text-headline-md text-primary-container mb-4 flex items-center gap-2">
+              <span className="material-symbols-outlined">timeline</span>
+              Goal Timeline
+            </h3>
             <div className="space-y-2">
               {match.goalTimeline.map((g: GoalTimelineEntry, i: number) => (
-                <div key={i} className={`flex items-center gap-3 p-3 rounded-lg ${g.team === "home" ? "bg-blue-900/30 border-l-4 border-blue-500" : "bg-purple-900/30 border-l-4 border-purple-500"}`}>
-                  <span className="text-sm font-mono text-gray-400 w-10 text-right">{g.minute}&apos;</span>
-                  <span className="text-sm text-gray-300">{g.team === "home" ? homeName : awayName}</span>
-                  <span className="font-medium">{g.scorer}</span>
-                  {g.ownGoal && <span className="text-xs bg-red-600/30 text-red-300 px-2 py-0.5 rounded-full">OG</span>}
+                <div key={i} className={`flex items-center gap-3 p-3 rounded-lg ${g.team === "home" ? "bg-primary-container/10 border-l-4 border-primary-container" : "bg-secondary/10 border-l-4 border-secondary"}`}>
+                  <span className="text-sm font-mono text-outline w-10 text-right shrink-0">{g.minute}&apos;</span>
+                  <span className="text-xs text-outline shrink-0">{g.team === "home" ? homeName : awayName}</span>
+                  <span className="text-sm font-medium text-on-surface truncate">{g.scorer}</span>
+                  {g.ownGoal && <span className="text-[10px] bg-error/20 text-error px-2 py-0.5 rounded-full shrink-0">OG</span>}
                 </div>
               ))}
             </div>
@@ -121,24 +128,51 @@ export default function MatchDetailPage() {
         )}
 
         {match.goalTimeline.length === 0 && played && (
-          <section className="mb-8 text-center py-8 text-gray-500">
-            <p>No goal details available for this match.</p>
+          <section className="glass-panel p-6 rounded-xl border border-outline-variant text-center">
+            <span className="material-symbols-outlined text-3xl text-outline mb-2">sports_soccer</span>
+            <p className="text-on-surface-variant text-sm">No goal details available for this match.</p>
           </section>
         )}
 
-        {match.matchNumber && (
-          <section className="glass-panel p-4 rounded-lg bg-gray-800/50">
-            <h3 className="text-sm text-gray-400 mb-2">Match Info</h3>
-            <div className="grid grid-cols-2 gap-2 text-sm">
-              <span className="text-gray-400">Match Number:</span>
-              <span>{match.matchNumber}</span>
-              {match.stage && <><span className="text-gray-400">Stage:</span><span>{match.stage}</span></>}
-              {match.venue && <><span className="text-gray-400">Venue:</span><span>{match.venue}</span></>}
-              {match.date && <><span className="text-gray-400">Date:</span><span>{formatDate(match.date)}</span></>}
-            </div>
-          </section>
-        )}
+        <section className="glass-panel p-4 md:p-6 rounded-xl border border-outline-variant">
+          <h3 className="font-headline-md text-headline-md text-primary-container mb-4 flex items-center gap-2">
+            <span className="material-symbols-outlined">info</span>
+            Match Info
+          </h3>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-sm">
+            {match.matchNumber && (
+              <>
+                <div className="text-outline">Match Number</div>
+                <div className="text-on-surface">{match.matchNumber}</div>
+              </>
+            )}
+            {match.stage && (
+              <>
+                <div className="text-outline">Stage</div>
+                <div className="text-on-surface">{match.stage}</div>
+              </>
+            )}
+            {match.venue && (
+              <>
+                <div className="text-outline">Venue</div>
+                <div className="text-on-surface">{match.venue}</div>
+              </>
+            )}
+            {match.date && (
+              <>
+                <div className="text-outline">Date</div>
+                <div className="text-on-surface">{formatDate(match.date)}</div>
+              </>
+            )}
+            {match.date && (
+              <>
+                <div className="text-outline">Time</div>
+                <div className="text-on-surface">{formatTime(match.date)}</div>
+              </>
+            )}
+          </div>
+        </section>
       </div>
-    </div>
+    </main>
   );
 }
