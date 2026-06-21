@@ -50,13 +50,7 @@ export default function TopNav() {
           </div>
         </div>
 
-        <div className="flex items-center gap-4">
-          <div className="w-8 h-8 rounded-full bg-surface-container-high border-2 border-outline-variant overflow-hidden cursor-pointer hover:border-primary-container transition-colors">
-            <div className="w-full h-full bg-gradient-to-br from-surface-container-highest to-surface-variant flex items-center justify-center">
-              <span className="material-symbols-outlined text-sm text-on-surface-variant">person</span>
-            </div>
-          </div>
-        </div>
+
       </nav>
 
       {mobileOpen && (
