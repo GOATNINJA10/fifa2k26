@@ -31,9 +31,15 @@ export default function MatchDetailPage() {
   useEffect(() => {
     if (!id) return;
     setLoading(true);
-    api.getMatch(parseInt(id, 10))
-      .then(setMatch)
-      .catch((err) => setError(err.message))
+    const numId = parseInt(id, 10);
+    Promise.all([
+      api.getMatch(numId),
+      api.getWcSchedule().catch(() => ({}) as Record<number, { dateTime: string; orderIndex: number }>),
+    ]).then(([m, schedule]) => {
+      const s = schedule[numId];
+      if (s?.dateTime) m.date = s.dateTime;
+      setMatch(m);
+    }).catch((err) => setError(err.message))
       .finally(() => setLoading(false));
   }, [id]);
 
