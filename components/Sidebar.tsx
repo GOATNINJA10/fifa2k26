@@ -9,7 +9,6 @@ const navItems = [
   { href: "/knockout", label: "Knockout", icon: "account_tree" },
   { href: "/schedule", label: "Schedule", icon: "calendar_today" },
   { href: "/statistics", label: "Statistics", icon: "leaderboard" },
-  { href: "/settings", label: "Settings", icon: "settings" },
 ];
 
 export default function Sidebar() {
@@ -60,17 +59,7 @@ export default function Sidebar() {
         New Simulation
       </button> */}
 
-      {/* Footer links */}
-      <div className="border-t border-outline-variant pt-4 flex flex-col gap-1">
-        <a href="#" className="flex items-center gap-4 text-on-surface-variant px-4 py-2 hover:text-primary transition-colors font-label-md text-label-md">
-          <span className="material-symbols-outlined">help</span>
-          Help
-        </a>
-        <a href="#" className="flex items-center gap-4 text-error px-4 py-2 hover:text-on-surface transition-colors font-label-md text-label-md">
-          <span className="material-symbols-outlined">logout</span>
-          Logout
-        </a>
-      </div>
+
     </aside>
   );
 }

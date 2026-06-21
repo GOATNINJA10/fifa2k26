@@ -112,17 +112,6 @@ export default function TopNav() {
               <span className="material-symbols-outlined text-sm">add</span>
               New Simulation
             </button> */}
-
-            <div className="border-t border-outline-variant pt-4 flex flex-col gap-1">
-              <button className="flex items-center gap-4 text-on-surface-variant px-4 py-2 hover:text-primary transition-colors font-label-md text-label-md w-full text-left">
-                <span className="material-symbols-outlined">help</span>
-                Help
-              </button>
-              <button className="flex items-center gap-4 text-error px-4 py-2 hover:text-on-surface transition-colors font-label-md text-label-md w-full text-left">
-                <span className="material-symbols-outlined">logout</span>
-                Logout
-              </button>
-            </div>
           </aside>
         </div>
       )}
