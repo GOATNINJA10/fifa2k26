@@ -65,16 +65,15 @@ export default function MatchDetailPage() {
 
   return (
     <main className="flex-1 p-4 md:p-8">
-      <section className="relative w-full rounded-xl overflow-hidden mb-6 border border-outline-variant glass-panel flex items-end md:min-h-80 md:mb-8">
+      <section className="relative w-full rounded-xl overflow-hidden mb-6 border border-outline-variant glass-panel flex flex-col items-center justify-center md:min-h-80 md:mb-8">
         <span className="material-symbols-outlined absolute top-[10%] left-[8%] text-4xl md:text-5xl text-primary-container/55 animate-float-1">sports_soccer</span>
         <span className="material-symbols-outlined absolute bottom-[30%] right-[15%] text-2xl md:text-3xl text-primary-container/40 animate-float-2" style={{ animationDelay: "-3s" }}>sports_soccer</span>
         <span className="material-symbols-outlined absolute top-[60%] left-[60%] text-xl md:text-2xl text-primary-container/35 animate-float-3" style={{ animationDelay: "-5s" }}>sports_soccer</span>
-        <div className="flex flex-col w-full relative z-10">
-          <Link href="/" className="text-primary-container hover:text-primary text-sm font-label-md mb-2 flex items-center gap-1">
-            <span className="material-symbols-outlined text-base">arrow_back</span>
-            Back
-          </Link>
-          <div className="flex flex-col items-center gap-2 mt-2">
+        <Link href="/" className="absolute top-4 left-4 md:top-6 md:left-6 text-primary-container hover:text-primary text-sm font-label-md flex items-center gap-1 z-10">
+          <span className="material-symbols-outlined text-base">arrow_back</span>
+          Back
+        </Link>
+        <div className="flex flex-col items-center gap-2 relative z-10">
             {match.stage && (
               <span className="text-xs uppercase tracking-widest text-outline">{match.stage.replace(/([A-Z])/g, " $1").trim() || match.stage}</span>
             )}
@@ -103,7 +102,6 @@ export default function MatchDetailPage() {
                 <h2 className="text-sm md:text-headline-md md:font-headline-md text-on-surface font-semibold">{awayName}</h2>
               </div>
             </div>
-          </div>
         </div>
       </section>
 
