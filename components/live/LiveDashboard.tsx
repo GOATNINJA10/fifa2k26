@@ -178,8 +178,22 @@ export default function LiveDashboard() {
 
       const live = await api.getLiveMatches();
       if (live.source === "live" && live.matches.length > 0) {
-        setMatches(live.matches as Match[]);
+        const liveArray = live.matches as Partial<Match>[];
+        const merged = matchData.map((m) => {
+          const home = normalizeName(m.homeTeam?.name ?? "");
+          const away = normalizeName(m.awayTeam?.name ?? "");
+          const liveMatch = liveArray.find((lm) => {
+            const lh = lm.homeTeam && typeof lm.homeTeam === "object" ? normalizeName((lm.homeTeam as { name: string }).name) : "";
+            const la = lm.awayTeam && typeof lm.awayTeam === "object" ? normalizeName((lm.awayTeam as { name: string }).name) : "";
+            return home === lh && away === la;
+          });
+          if (!liveMatch) return m;
+          return { ...m, homeGoals: liveMatch.homeGoals ?? m.homeGoals, awayGoals: liveMatch.awayGoals ?? m.awayGoals, played: liveMatch.played ?? m.played, status: liveMatch.status ?? m.status };
+        });
+        setMatches(merged);
         setLiveSource("live");
+      } else {
+        setMatches(matchData);
       }
     } catch {
       setError(null);
