@@ -165,21 +165,28 @@ export default function LiveDashboard() {
     setLoading(true);
     setError(null);
     try {
-      const [teamData, matchData, scorerData, goalScorerData] = await Promise.all([
+      const [teamData, matchData, scorerData, goalScorerData, scheduleData] = await Promise.all([
         api.getTeams(),
         api.getMatches(),
         api.getTopScorers(),
         api.getGoalScorers(),
+        api.getWcSchedule().catch(() => ({}) as Record<number, { dateTime: string; orderIndex: number }>),
       ]);
       setTeams(teamData);
-      setMatches(matchData);
+
+      const withSchedule = matchData.map((m) => {
+        const s = scheduleData[m.id];
+        if (s?.dateTime) return { ...m, date: s.dateTime };
+        return m;
+      });
+      setMatches(withSchedule);
       setTopScorers(scorerData.data);
       setGoalScorers(goalScorerData);
 
       const live = await api.getLiveMatches();
       if (live.source === "live" && live.matches.length > 0) {
         const liveArray = live.matches as Partial<Match>[];
-        const merged = matchData.map((m) => {
+        const merged = withSchedule.map((m) => {
           const home = normalizeName(m.homeTeam?.name ?? "");
           const away = normalizeName(m.awayTeam?.name ?? "");
           const liveMatch = liveArray.find((lm) => {
