@@ -62,15 +62,27 @@ export default function VideoModal({ highlight, onClose }: VideoModalProps) {
           )}
         </div>
 
-        {/* YouTube Embed */}
-        <div className="relative aspect-video bg-black rounded-xl overflow-hidden shadow-2xl">
-          <iframe
-            src={`https://www.youtube.com/embed/${highlight.videoId}?autoplay=1&rel=0`}
-            title={highlight.title}
-            className="absolute inset-0 w-full h-full"
-            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-            allowFullScreen
+        {/* Watch on YouTube */}
+        <div className="relative aspect-video bg-black rounded-xl overflow-hidden shadow-2xl flex items-center justify-center">
+          <img
+            src={`https://img.youtube.com/vi/${highlight.videoId}/hqdefault.jpg`}
+            alt={highlight.title}
+            className="absolute inset-0 w-full h-full object-cover opacity-50"
           />
+          <div className="relative z-10 text-center">
+            <svg className="w-20 h-20 mx-auto text-red-600 mb-4" fill="currentColor" viewBox="0 0 24 24">
+              <path d="M21.543 6.498C22 8.28 22 12 22 12s0 3.72-.457 5.502c-.254.985-.997 1.76-1.938 2.022C17.896 20 12 20 12 20s-5.893 0-7.605-.476c-.945-.266-1.687-1.04-1.938-2.022C2 15.72 2 12 2 12s0-3.72.457-5.502c.254-.985.997-1.76 1.938-2.022C6.107 4 12 4 12 4s5.896 0 7.605.476c.945.266 1.687 1.04 1.938 2.022zM10 15.5l6-3.5-6-3.5v7z"/>
+            </svg>
+            <a
+              href={`https://www.youtube.com/watch?v=${highlight.videoId}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-block px-8 py-3 bg-red-600 hover:bg-red-700 text-white font-bold rounded-lg transition-colors text-lg"
+            >
+              Watch on YouTube
+            </a>
+            <p className="text-gray-400 text-sm mt-3">Opens in a new tab</p>
+          </div>
         </div>
 
         {/* Video Info */}
