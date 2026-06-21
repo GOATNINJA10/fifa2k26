@@ -114,6 +114,19 @@ export type Highlight = {
   match?: Match | null;
 };
 
+export type YouTubeVideoResult = {
+  id: string;
+  title: string;
+  description: string;
+  thumbnailUrl: string;
+  publishedAt: string;
+};
+
+export type YouTubeSearchResponse = {
+  source: string;
+  data: YouTubeVideoResult[];
+};
+
 export type HighlightsResponse = {
   source: string;
   data: Highlight[];
@@ -165,4 +178,15 @@ export const api = {
     if (params?.limit) query.set("limit", String(params.limit));
     return fetchJson<HighlightsResponse>(`/highlights?${query.toString()}`);
   },
+  searchYouTube: (homeTeam: string, awayTeam: string, date?: string) => {
+    const params = new URLSearchParams({ homeTeam, awayTeam });
+    if (date) params.set("date", date);
+    return fetchJson<YouTubeSearchResponse>(`/highlights/search?${params.toString()}`);
+  },
+  createHighlight: (data: { title: string; videoId: string; description?: string; thumbnailUrl?: string; stage: string; team?: string; matchId?: number }) =>
+    fetchJson<Highlight>("/highlights", { method: "POST", body: JSON.stringify({ ...data, published: true }) }),
+  autoPopulateHighlights: () =>
+    fetchJson<{ message: string }>("/highlights/auto-populate", { method: "POST" }),
+  clearAllHighlights: () =>
+    fetchJson<{ message: string }>("/highlights", { method: "DELETE" }),
 };

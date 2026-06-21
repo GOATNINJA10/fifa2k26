@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { api, Highlight, HighlightsResponse } from "@/lib/api";
+import { api, Highlight } from "@/lib/api";
 import VideoCard from "@/components/live/VideoCard";
 import VideoModal from "@/components/live/VideoModal";
 
@@ -15,6 +15,7 @@ const STAGE_OPTIONS = [
 export default function HighlightsPage() {
   const [highlights, setHighlights] = useState<Highlight[]>([]);
   const [loading, setLoading] = useState(true);
+  const [populating, setPopulating] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [selectedStage, setSelectedStage] = useState("");
   const [selectedTeam, setSelectedTeam] = useState("");
@@ -43,6 +44,18 @@ export default function HighlightsPage() {
     }
   };
 
+  const handleAutoPopulate = async () => {
+    setPopulating(true);
+    try {
+      const res = await api.autoPopulateHighlights();
+      await loadHighlights();
+    } catch (err) {
+      console.error("Auto-populate error:", err);
+    } finally {
+      setPopulating(false);
+    }
+  };
+
   const filteredHighlights = searchQuery
     ? highlights.filter(
         (h) =>
@@ -61,6 +74,26 @@ export default function HighlightsPage() {
           <p className="text-gray-300">
             Watch the best moments from the 2026 FIFA World Cup
           </p>
+          <div className="flex gap-3 mt-4">
+            <button
+              onClick={handleAutoPopulate}
+              disabled={populating}
+              className="px-6 py-2 bg-red-600 hover:bg-red-700 disabled:bg-gray-600 text-white rounded-lg transition-colors flex items-center gap-2"
+            >
+              <span className="material-symbols-outlined text-lg">{populating ? "sync" : "youtube_activity"}</span>
+              {populating ? "Searching YouTube..." : "Auto-populate from YouTube"}
+            </button>
+            <button
+              onClick={async () => {
+                await api.clearAllHighlights();
+                loadHighlights();
+              }}
+              className="px-6 py-2 bg-gray-700 hover:bg-gray-600 text-white rounded-lg transition-colors flex items-center gap-2"
+            >
+              <span className="material-symbols-outlined text-lg">delete</span>
+              Clear All
+            </button>
+          </div>
         </div>
       </div>
 
