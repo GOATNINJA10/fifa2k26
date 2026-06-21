@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import Link from "next/link";
 import { api, Match, GoalScorerEntry } from "@/lib/api";
 
 const STAGE_LABELS: Record<string, string> = {
@@ -233,9 +234,10 @@ function parseScorerDisplay(raw: string | null): string {
                 const scorers = scorerMap.get(scorerKey);
                 const hasScorers = (match.played || live) && scorers && (scorers.homeScorers || scorers.awayScorers);
                 return (
-                  <div
+                  <Link
                     key={match.id}
-                    className={`rounded-xl border px-3 py-2.5 md:px-5 md:py-3 transition-colors ${
+                    href={`/matches/${match.id}`}
+                    className={`rounded-xl border px-3 py-2.5 md:px-5 md:py-3 transition-colors block hover:ring-1 hover:ring-blue-500/50 ${
                       match.played
                         ? "bg-surface-container border-outline-variant"
                         : live
@@ -285,7 +287,7 @@ function parseScorerDisplay(raw: string | null): string {
                         <div className="text-left w-[35%] md:w-[40%]">{parseScorerDisplay(scorers.awayScorers)}</div>
                       </div>
                     )}
-                  </div>
+                  </Link>
                 );
               })}
             </div>

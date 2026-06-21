@@ -133,6 +133,33 @@ export type HighlightsResponse = {
   total: number;
 };
 
+export type GoalTimelineEntry = {
+  team: "home" | "away";
+  scorer: string;
+  minute: string;
+  ownGoal: boolean;
+};
+
+export type MatchDetail = Match & {
+  liveScore: { homeScore: number; awayScore: number; played: boolean } | null;
+  goalTimeline: GoalTimelineEntry[];
+};
+
+export type MatchDetailResponse = MatchDetail;
+
+export type TournamentStats = {
+  totalMatches: number;
+  totalGoals: number;
+  avgGoals: string;
+  biggestWin: { home: string; away: string; diff: number; homeScore: number; awayScore: number };
+  mostGoalsMatch: { home: string; away: string; total: number; homeScore: number; awayScore: number };
+  topScoringTeam: { name: string; goalsFor: number; goalsAgainst: number; cleanSheets: number; played: number } | null;
+  mostCleanSheets: { name: string; cleanSheets: number } | null;
+  teamStats: Array<{ name: string; goalsFor: number; goalsAgainst: number; cleanSheets: number; played: number }>;
+};
+
+export type TournamentStatsResponse = TournamentStats;
+
 async function fetchJson<T>(path: string, init?: RequestInit): Promise<T> {
   const response = await fetch(`${API_BASE_URL}${path}`, {
     cache: "no-store",
@@ -170,6 +197,8 @@ export const api = {
   getStandings: () => fetchJson<StandingsResponse>("/stats/standings"),
   getWcSchedule: () => fetchJson<Record<number, { dateTime: string; orderIndex: number }>>("/matches/wc-schedule"),
   getGoalScorers: () => fetchJson<GoalScorerEntry[]>("/matches/goal-scorers"),
+  getMatch: (id: number) => fetchJson<MatchDetailResponse>(`/matches/${id}`),
+  getTournamentStats: () => fetchJson<TournamentStatsResponse>("/stats/tournament"),
   getHighlights: (params?: { stage?: string; team?: string; search?: string; limit?: number }) => {
     const query = new URLSearchParams();
     if (params?.stage) query.set("stage", params.stage);

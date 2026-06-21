@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import StatisticsBoard from "@/components/live/StatisticsBoard";
+import TournamentStatsBoard from "@/components/live/TournamentStats";
 
 export default function StatisticsPage() {
   const [mounted, setMounted] = useState(false);
@@ -17,5 +18,10 @@ export default function StatisticsPage() {
       </main>
     );
   }
-  return <StatisticsBoard />;
+  return (
+    <main className="flex-1 p-4 md:p-8 space-y-6">
+      <TournamentStatsBoard />
+      <StatisticsBoard />
+    </main>
+  );
 }

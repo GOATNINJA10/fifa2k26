@@ -475,7 +475,7 @@ export default function LiveDashboard() {
                   const scorerKey = `${normalizeName(homeName)}|${normalizeName(awayName)}`;
                   const scorers = scorerMap.get(scorerKey);
                   return (
-                    <div key={`live-${match.id}`} className="bg-red-900/20 p-2 md:p-4 rounded-lg border border-red-500/40 transition-colors">
+                    <Link key={`live-${match.id}`} href={`/matches/${match.id}`} className="block bg-red-900/20 p-2 md:p-4 rounded-lg border border-red-500/40 hover:border-red-500 transition-colors">
                       <div className="flex justify-between items-center">
                         <div className="flex flex-col items-end w-[35%] md:w-[40%]">
                           <span className="text-xs md:text-body-md md:font-body-md text-on-surface font-semibold truncate max-w-full">{homeName}</span>
@@ -497,7 +497,7 @@ export default function LiveDashboard() {
                           <div className="text-left w-[35%] md:w-[40%]">{parseScorerDisplay(scorers.awayScorers)}</div>
                         </div>
                       )}
-                    </div>
+                    </Link>
                   );
                 })}
                 <hr className="border-outline-variant my-2" />
@@ -519,7 +519,7 @@ export default function LiveDashboard() {
               const scorerKey = `${normalizeName(homeName)}|${normalizeName(awayName)}`;
               const scorers = scorerMap.get(scorerKey);
               return (
-                <div key={match.id} className="bg-surface p-2 md:p-4 rounded-lg border border-outline-variant hover:border-primary/50 transition-colors">
+                <Link key={match.id} href={`/matches/${match.id}`} className="block bg-surface p-2 md:p-4 rounded-lg border border-outline-variant hover:border-primary/50 transition-colors">
                   <div className="flex justify-between items-center">
                     <div className="flex flex-col items-end w-[35%] md:w-[40%]">
                       <span className={`text-xs md:text-body-md md:font-body-md font-semibold truncate max-w-full ${homeWon ? "text-green-400" : "text-on-surface"}`}>{homeName}</span>
@@ -541,7 +541,7 @@ export default function LiveDashboard() {
                       <div className="text-left w-[35%] md:w-[40%]">{parseScorerDisplay(scorers.awayScorers)}</div>
                     </div>
                   )}
-                </div>
+                </Link>
               );
             })}
           </div>
