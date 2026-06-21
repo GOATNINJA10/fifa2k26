@@ -9,7 +9,6 @@ const navLinks = [
   { href: "/group-stage", label: "Group Stage", icon: "grid_view" },
   { href: "/schedule", label: "Schedule", icon: "calendar_month" },
   { href: "/knockout", label: "Knockout", icon: "account_tree" },
-  { href: "/highlights", label: "Highlights", icon: "slow_motion_video" },
   { href: "/statistics", label: "Statistics", icon: "leaderboard" },
 ];
 

@@ -8,7 +8,6 @@ const navItems = [
   { href: "/group-stage", label: "Group Stage", icon: "grid_view" },
   { href: "/knockout", label: "Knockout", icon: "account_tree" },
   { href: "/schedule", label: "Schedule", icon: "calendar_today" },
-  { href: "/highlights", label: "Highlights", icon: "slow_motion_video" },
   { href: "/statistics", label: "Statistics", icon: "leaderboard" },
   { href: "/settings", label: "Settings", icon: "settings" },
 ];
