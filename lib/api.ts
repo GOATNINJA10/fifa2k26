@@ -183,6 +183,8 @@ export const api = {
     if (date) params.set("date", date);
     return fetchJson<YouTubeSearchResponse>(`/highlights/search?${params.toString()}`);
   },
+  searchYouTubeGeneral: (query: string) =>
+    fetchJson<YouTubeSearchResponse>(`/highlights/search?q=${encodeURIComponent(query)}`),
   createHighlight: (data: { title: string; videoId: string; description?: string; thumbnailUrl?: string; stage: string; team?: string; matchId?: number }) =>
     fetchJson<Highlight>("/highlights", { method: "POST", body: JSON.stringify({ ...data, published: true }) }),
   autoPopulateHighlights: () =>
