@@ -64,8 +64,8 @@ export default function MatchDetailPage() {
   const played = match.liveScore?.played ?? match.played;
 
   return (
-    <main className="flex-1">
-      <div className="relative w-full overflow-hidden border-b border-outline-variant glass-panel flex items-end p-4 md:min-h-80 md:p-8">
+    <main className="flex-1 p-4 md:p-8">
+      <section className="relative w-full rounded-xl overflow-hidden mb-6 border border-outline-variant glass-panel flex items-end md:min-h-80 md:mb-8">
         <span className="material-symbols-outlined absolute top-[10%] left-[8%] text-4xl md:text-5xl text-primary-container/55 animate-float-1">sports_soccer</span>
         <span className="material-symbols-outlined absolute bottom-[30%] right-[15%] text-2xl md:text-3xl text-primary-container/40 animate-float-2" style={{ animationDelay: "-3s" }}>sports_soccer</span>
         <span className="material-symbols-outlined absolute top-[60%] left-[60%] text-xl md:text-2xl text-primary-container/35 animate-float-3" style={{ animationDelay: "-5s" }}>sports_soccer</span>
@@ -105,7 +105,7 @@ export default function MatchDetailPage() {
             </div>
           </div>
         </div>
-      </div>
+      </section>
 
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-6 md:py-8 space-y-6">
         {match.goalTimeline.length > 0 && (
