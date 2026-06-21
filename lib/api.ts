@@ -101,6 +101,25 @@ export type GoalScorerEntry = {
   awayScorers: string | null;
 };
 
+export type Highlight = {
+  id: number;
+  title: string;
+  videoId: string;
+  description?: string | null;
+  thumbnailUrl?: string | null;
+  stage: string;
+  team?: string | null;
+  createdAt: string;
+  published: boolean;
+  match?: Match | null;
+};
+
+export type HighlightsResponse = {
+  source: string;
+  data: Highlight[];
+  total: number;
+};
+
 async function fetchJson<T>(path: string, init?: RequestInit): Promise<T> {
   const response = await fetch(`${API_BASE_URL}${path}`, {
     cache: "no-store",
@@ -138,4 +157,12 @@ export const api = {
   getStandings: () => fetchJson<StandingsResponse>("/stats/standings"),
   getWcSchedule: () => fetchJson<Record<number, { dateTime: string; orderIndex: number }>>("/matches/wc-schedule"),
   getGoalScorers: () => fetchJson<GoalScorerEntry[]>("/matches/goal-scorers"),
+  getHighlights: (params?: { stage?: string; team?: string; search?: string; limit?: number }) => {
+    const query = new URLSearchParams();
+    if (params?.stage) query.set("stage", params.stage);
+    if (params?.team) query.set("team", params.team);
+    if (params?.search) query.set("search", params.search);
+    if (params?.limit) query.set("limit", String(params.limit));
+    return fetchJson<HighlightsResponse>(`/highlights?${query.toString()}`);
+  },
 };
