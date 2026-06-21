@@ -65,7 +65,7 @@ export default function MatchDetailPage() {
 
   return (
     <main className="flex-1 p-4 md:p-8">
-      <section className="relative w-full rounded-xl overflow-hidden mb-6 border border-outline-variant glass-panel flex flex-col items-center justify-center md:min-h-80 md:mb-8">
+      <section className="relative w-full rounded-xl overflow-hidden mb-6 border border-outline-variant glass-panel flex flex-col items-center justify-center min-h-56 md:min-h-80 md:mb-8">
         <span className="material-symbols-outlined absolute top-[10%] left-[8%] text-4xl md:text-5xl text-primary-container/55 animate-float-1">sports_soccer</span>
         <span className="material-symbols-outlined absolute bottom-[30%] right-[15%] text-2xl md:text-3xl text-primary-container/40 animate-float-2" style={{ animationDelay: "-3s" }}>sports_soccer</span>
         <span className="material-symbols-outlined absolute top-[60%] left-[60%] text-xl md:text-2xl text-primary-container/35 animate-float-3" style={{ animationDelay: "-5s" }}>sports_soccer</span>
@@ -89,7 +89,7 @@ export default function MatchDetailPage() {
                 <h2 className="text-sm md:text-headline-md md:font-headline-md text-on-surface font-semibold">{homeName}</h2>
               </div>
               <div className="flex flex-col items-center shrink-0">
-                <div className="text-4xl md:text-7xl font-extrabold tabular-nums text-secondary">
+                <div className="text-5xl md:text-7xl font-extrabold tabular-nums text-secondary">
                   {played ? `${homeScore} - ${awayScore}` : "vs"}
                 </div>
                 <div className="text-xs text-outline mt-1 md:mt-2">{match.venue || "Venue TBD"}</div>
