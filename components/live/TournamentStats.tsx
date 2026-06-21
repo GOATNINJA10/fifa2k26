@@ -108,21 +108,6 @@ export default function TournamentStatsBoard() {
         ))}
       </div>
 
-      {stats.teamStats.length > 0 && (
-        <div className="mt-6">
-          <h3 className="text-sm font-semibold text-gray-300 mb-3">Team Goals Leaderboard</h3>
-          <div className="space-y-1">
-            {stats.teamStats.slice(0, 10).map((t, i) => (
-              <div key={t.name} className="flex items-center gap-3 bg-gray-800/30 px-3 py-2 rounded-lg text-sm">
-                <span className="text-gray-500 w-5 text-right">{i + 1}</span>
-                <span className="flex-1 text-gray-200">{t.name}</span>
-                <span className="text-green-400 font-medium">{t.goalsFor} goals</span>
-                <span className="text-gray-500 text-xs">{t.played} matches</span>
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
     </div>
   );
 }
