@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import { api, Match, Player, Team, GoalScorerEntry } from "@/lib/api";
 
@@ -210,12 +210,27 @@ export default function LiveDashboard() {
     });
   }
 
+  const finishedCountRef = useRef(0);
+
   async function refreshLive() {
     try {
       const live = await api.getLiveMatches();
       if (live.source === "live" && live.matches.length > 0) {
         setLiveSource("live");
-        setMatches((prev) => mergeLive(prev, live.matches));
+        const finishedNow = live.matches.filter((m: Partial<Match>) => m.played).length;
+        const prevFinished = finishedCountRef.current;
+        setMatches((prev) => {
+          const merged = mergeLive(prev, live.matches);
+          const newFinished = merged.filter((m) => m.played).length;
+          finishedCountRef.current = newFinished;
+          if (newFinished > prevFinished) {
+            Promise.all([
+              api.getTopScorers().then((r) => setTopScorers(r.data)).catch(() => {}),
+              api.getGoalScorers().then(setGoalScorers).catch(() => {}),
+            ]);
+          }
+          return merged;
+        });
       }
     } catch { }
   }
