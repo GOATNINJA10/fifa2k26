@@ -369,7 +369,7 @@ export default function LiveDashboard() {
           <span className="material-symbols-outlined text-4xl text-error">error</span>
           <p className="text-error font-headline-md text-sm md:text-base">Loading...</p>
           <p className="text-on-surface-variant text-xs md:text-sm">Could not connect to server. Retrying...</p>
-          <button onClick={load} className="bg-primary-container text-on-primary-container px-4 py-2 rounded-lg font-label-md">Retry</button>
+          <button onClick={loadInitial} className="bg-primary-container text-on-primary-container px-4 py-2 rounded-lg font-label-md">Retry</button>
         </div>
       </main>
     );
