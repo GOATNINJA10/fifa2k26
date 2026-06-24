@@ -161,7 +161,7 @@ export default function LiveDashboard() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  async function load() {
+  async function loadInitial() {
     setLoading(true);
     setError(null);
     try {
@@ -173,34 +173,21 @@ export default function LiveDashboard() {
         api.getWcSchedule().catch(() => ({}) as Record<number, { dateTime: string; orderIndex: number }>),
       ]);
       setTeams(teamData);
+      setTopScorers(scorerData.data);
+      setGoalScorers(goalScorerData);
 
       const withSchedule = matchData.map((m) => {
         const s = scheduleData[m.id];
         if (s?.dateTime) return { ...m, date: s.dateTime };
         return m;
       });
-      setMatches(withSchedule);
-      setTopScorers(scorerData.data);
-      setGoalScorers(goalScorerData);
 
       const live = await api.getLiveMatches();
       if (live.source === "live" && live.matches.length > 0) {
-        const liveArray = live.matches as Partial<Match>[];
-        const merged = withSchedule.map((m) => {
-          const home = normalizeName(m.homeTeam?.name ?? "");
-          const away = normalizeName(m.awayTeam?.name ?? "");
-          const liveMatch = liveArray.find((lm) => {
-            const lh = lm.homeTeam && typeof lm.homeTeam === "object" ? normalizeName((lm.homeTeam as { name: string }).name) : "";
-            const la = lm.awayTeam && typeof lm.awayTeam === "object" ? normalizeName((lm.awayTeam as { name: string }).name) : "";
-            return home === lh && away === la;
-          });
-          if (!liveMatch) return m;
-          return { ...m, homeGoals: liveMatch.homeGoals ?? m.homeGoals, awayGoals: liveMatch.awayGoals ?? m.awayGoals, played: liveMatch.played ?? m.played, status: liveMatch.status ?? m.status };
-        });
-        setMatches(merged);
         setLiveSource("live");
+        setMatches(mergeLive(withSchedule, live.matches));
       } else {
-        setMatches(matchData);
+        setMatches(withSchedule);
       }
     } catch {
       setError(null);
@@ -209,9 +196,33 @@ export default function LiveDashboard() {
     }
   }
 
+  function mergeLive(dbMatches: Match[], liveArray: Partial<Match>[]) {
+    return dbMatches.map((m) => {
+      const home = normalizeName(m.homeTeam?.name ?? "");
+      const away = normalizeName(m.awayTeam?.name ?? "");
+      const liveMatch = (liveArray as Partial<Match>[]).find((lm) => {
+        const lh = lm.homeTeam && typeof lm.homeTeam === "object" ? normalizeName((lm.homeTeam as { name: string }).name) : "";
+        const la = lm.awayTeam && typeof lm.awayTeam === "object" ? normalizeName((lm.awayTeam as { name: string }).name) : "";
+        return home === lh && away === la;
+      });
+      if (!liveMatch) return m;
+      return { ...m, homeGoals: liveMatch.homeGoals ?? m.homeGoals, awayGoals: liveMatch.awayGoals ?? m.awayGoals, played: liveMatch.played ?? m.played, status: liveMatch.status ?? m.status };
+    });
+  }
+
+  async function refreshLive() {
+    try {
+      const live = await api.getLiveMatches();
+      if (live.source === "live" && live.matches.length > 0) {
+        setLiveSource("live");
+        setMatches((prev) => mergeLive(prev, live.matches));
+      }
+    } catch { }
+  }
+
   useEffect(() => {
-    load();
-    const interval = setInterval(load, 60000);
+    loadInitial();
+    const interval = setInterval(refreshLive, 60000);
     return () => clearInterval(interval);
   }, []);
 
@@ -251,7 +262,7 @@ export default function LiveDashboard() {
     const nm = nextGroup.group[0];
     function tick() {
       const diff = new Date(nm.date).getTime() - Date.now();
-      if (diff <= 0) { setCountdown("Starting soon"); if (Math.abs(diff) > 60000) load(); return; }
+      if (diff <= 0) { setCountdown("Starting soon"); if (Math.abs(diff) > 60000) refreshLive(); return; }
       const days = Math.floor(diff / 86400000);
       const hours = Math.floor((diff % 86400000) / 3600000);
       const minutes = Math.floor((diff % 3600000) / 60000);
