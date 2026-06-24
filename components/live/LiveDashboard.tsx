@@ -238,10 +238,10 @@ export default function LiveDashboard() {
     if (nextMatches.length === 0) return { group: [] as typeof nextMatches, rest: [] as typeof nextMatches };
     const firstDate = nextMatches[0].date;
     const group: typeof nextMatches = [];
-    const rest: typeof nextMatches = [];
+      const rest: typeof nextMatches = [];
     for (const m of nextMatches) {
       if (m.date === firstDate) group.push(m);
-      else rest.push(m);
+      else if (rest.length < 4) rest.push(m);
     }
     return { group, rest };
   }, [nextMatches]);
@@ -251,7 +251,7 @@ export default function LiveDashboard() {
     const nm = nextGroup.group[0];
     function tick() {
       const diff = new Date(nm.date).getTime() - Date.now();
-      if (diff <= 0) { setCountdown("Starting soon"); return; }
+      if (diff <= 0) { setCountdown("Starting soon"); if (Math.abs(diff) > 60000) load(); return; }
       const days = Math.floor(diff / 86400000);
       const hours = Math.floor((diff % 86400000) / 3600000);
       const minutes = Math.floor((diff % 3600000) / 60000);
