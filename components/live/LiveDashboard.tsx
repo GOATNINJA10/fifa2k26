@@ -225,7 +225,7 @@ export default function LiveDashboard() {
     const upcoming = matches
       .filter((m) => !m.played && m.status !== "IN_PLAY" && m.status !== "PAUSED" && m.status !== "LIVE" && m.date)
       .sort((a, b) => (a.date ?? "").localeCompare(b.date ?? ""))
-      .slice(0, 5);
+      .slice(0, 8);
     return upcoming.map((m) => ({
       homeName: m.homeLabel || (m.homeTeam?.name ?? ""),
       awayName: m.awayLabel || (m.awayTeam?.name ?? ""),
@@ -234,9 +234,21 @@ export default function LiveDashboard() {
     }));
   }, [matches]);
 
+  const nextGroup = useMemo(() => {
+    if (nextMatches.length === 0) return { group: [] as typeof nextMatches, rest: [] as typeof nextMatches };
+    const firstDate = nextMatches[0].date;
+    const group: typeof nextMatches = [];
+    const rest: typeof nextMatches = [];
+    for (const m of nextMatches) {
+      if (m.date === firstDate) group.push(m);
+      else rest.push(m);
+    }
+    return { group, rest };
+  }, [nextMatches]);
+
   useEffect(() => {
-    if (nextMatches.length === 0) return;
-    const nm = nextMatches[0];
+    if (nextGroup.group.length === 0) return;
+    const nm = nextGroup.group[0];
     function tick() {
       const diff = new Date(nm.date).getTime() - Date.now();
       if (diff <= 0) { setCountdown("Starting soon"); return; }
@@ -250,7 +262,7 @@ export default function LiveDashboard() {
     tick();
     const interval = setInterval(tick, 30000);
     return () => clearInterval(interval);
-  }, [nextMatches]);
+  }, [nextGroup]);
 
   const teamNameMap = useMemo(() => {
     const map = new Map<string, string>();
@@ -413,25 +425,27 @@ export default function LiveDashboard() {
             <div className="absolute top-2/3 right-6 text-lg md:text-xl opacity-[0.04] pointer-events-none select-none animate-float-3" style={{ animationDelay: "1s" }}>⚽</div>
             <div className="absolute top-1/2 left-1/2 text-xs md:text-sm opacity-[0.03] pointer-events-none select-none animate-float-1" style={{ animationDelay: "3s" }}>⚽</div>
             <h3 className="text-sm md:text-headline-md md:font-headline-md text-on-surface mb-2">Next Match</h3>
-            {nextMatches.length > 0 ? (
+            {nextGroup.group.length > 0 ? (
               <div className="relative z-10 space-y-1.5">
-                <div className="bg-primary/10 p-2 md:p-4 rounded-lg border border-primary/30">
-                  <div className="flex justify-between items-center gap-3 md:gap-4">
-                    <div className="flex flex-col items-end flex-1 min-w-0">
-                      <span className="text-xs md:text-body-md md:font-body-md font-semibold truncate max-w-full text-on-surface">{nextMatches[0].homeName}</span>
-                      <span className="text-[10px] md:text-label-md md:font-label-md text-outline">{nextMatches[0].venue}</span>
-                    </div>
-                    <div className="flex flex-col items-center shrink-0">
-                      <span className="text-sm md:text-headline-md md:font-headline-md text-secondary font-bold tabular-nums whitespace-nowrap">{countdown}</span>
-                      <span className="text-[10px] md:text-tabular-nums md:font-tabular-nums text-outline">starts in</span>
-                    </div>
-                    <div className="flex flex-col items-start flex-1 min-w-0">
-                      <span className="text-xs md:text-body-md md:font-body-md font-semibold truncate max-w-full text-on-surface">{nextMatches[0].awayName}</span>
-                      <span className="text-[10px] md:text-label-md md:font-label-md text-outline truncate max-w-full">{new Date(nextMatches[0].date).toLocaleDateString("en-IN", { month: "short", day: "numeric", timeZone: "Asia/Kolkata" })}</span>
+                {nextGroup.group.map((m, i) => (
+                  <div key={i} className="bg-primary/10 p-2 md:p-4 rounded-lg border border-primary/30">
+                    <div className="flex justify-between items-center gap-3 md:gap-4">
+                      <div className="flex flex-col items-end flex-1 min-w-0">
+                        <span className="text-xs md:text-body-md md:font-body-md font-semibold truncate max-w-full text-on-surface">{m.homeName}</span>
+                        <span className="text-[10px] md:text-label-md md:font-label-md text-outline">{m.venue}</span>
+                      </div>
+                      <div className="flex flex-col items-center shrink-0">
+                        <span className="text-sm md:text-headline-md md:font-headline-md text-secondary font-bold tabular-nums whitespace-nowrap">{countdown}</span>
+                        <span className="text-[10px] md:text-tabular-nums md:font-tabular-nums text-outline">starts in</span>
+                      </div>
+                      <div className="flex flex-col items-start flex-1 min-w-0">
+                        <span className="text-xs md:text-body-md md:font-body-md font-semibold truncate max-w-full text-on-surface">{m.awayName}</span>
+                        <span className="text-[10px] md:text-label-md md:font-label-md text-outline truncate max-w-full">{new Date(m.date).toLocaleDateString("en-IN", { month: "short", day: "numeric", timeZone: "Asia/Kolkata" })}</span>
+                      </div>
                     </div>
                   </div>
-                </div>
-                {nextMatches.slice(1).map((m, i) => (
+                ))}
+                {nextGroup.rest.map((m, i) => (
                   <div key={i} className="bg-surface p-1.5 md:p-2 rounded-lg border border-outline-variant/40 hover:border-outline-variant transition-colors">
                     <div className="flex justify-between items-center gap-3 md:gap-4">
                       <div className="flex flex-col items-end flex-1 min-w-0">
