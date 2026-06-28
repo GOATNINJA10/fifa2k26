@@ -2,7 +2,23 @@
 
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
-import { api, Match, GoalScorerEntry } from "@/lib/api";
+import { api, Match, GoalScorerEntry, BracketResponse, StandingsGroup } from "@/lib/api";
+
+// A unified fixture type that covers both real Match rows and bracket-only fixtures
+type KnockoutFixture = {
+  matchNumber?: number | null;
+  stage: string;
+  date?: string | null;
+  venue?: string | null;
+  homeLabel?: string | null;
+  awayLabel?: string | null;
+  // real match fields (optional)
+  id?: number;
+  homeGoals?: number;
+  awayGoals?: number;
+  played?: boolean;
+  status?: string;
+};
 
 const STAGE_LABELS: Record<string, string> = {
   Group: "Group Stage",
@@ -41,6 +57,8 @@ function formatTime(dateStr: string | null | undefined, wcDate?: string) {
 
 export default function MatchSchedule() {
   const [matches, setMatches] = useState<Match[]>([]);
+  const [bracket, setBracket] = useState<BracketResponse | null>(null);
+  const [standingsData, setStandingsData] = useState<StandingsGroup[]>([]);
   const [liveMap, setLiveMap] = useState<Map<string, Partial<Match>>>(new Map());
   const [wcSchedule, setWcSchedule] = useState<Record<number, { dateTime: string; orderIndex: number }>>({});
   const [goalScorers, setGoalScorers] = useState<GoalScorerEntry[]>([]);
@@ -72,15 +90,19 @@ async function load() {
   setLoading(true);
   setLoadError(null);
   try {
-    const [data, live, schedule, scorers] = await Promise.all([
+    const [data, live, schedule, scorers, bracketData, standingsRes] = await Promise.all([
       api.getMatches(),
       api.getLiveMatches().catch(() => null),
       api.getWcSchedule().catch(() => ({})),
       api.getGoalScorers().catch(() => []),
+      api.getBracket().catch(() => null),
+      api.getStandings().catch(() => null),
     ]);
     setMatches(data);
     setWcSchedule(schedule);
     setGoalScorers(scorers);
+    setBracket(bracketData);
+    if (standingsRes) setStandingsData(standingsRes.data);
     if (live && live.source === "live" && live.matches.length > 0) {
       const map = new Map<string, Partial<Match>>();
       for (const m of live.matches) {
@@ -150,6 +172,60 @@ function parseScorerDisplay(raw: string | null): string {
   return Array.from(grouped).map(([name, minutes]) => `${name} ${minutes.join(", ")}`).join("; ");
 }
 
+  // Build knockout fixtures from bracket response, keyed by stage
+  const knockoutByStage = useMemo<Map<string, KnockoutFixture[]>>(() => {
+    const map = new Map<string, KnockoutFixture[]>();
+    if (!bracket) return map;
+    const sections: Array<{ key: keyof BracketResponse; stage: string }> = [
+      { key: "r32", stage: "R32" },
+      { key: "r16", stage: "R16" },
+      { key: "qf", stage: "QF" },
+      { key: "sf", stage: "SF" },
+    ];
+    for (const { key, stage } of sections) {
+      const arr = bracket[key] as KnockoutFixture[] | undefined;
+      if (arr && arr.length > 0) {
+        map.set(stage, [...arr].sort((a, b) => (a.matchNumber ?? 0) - (b.matchNumber ?? 0)));
+      }
+    }
+    // final array contains both 3P and F
+    if (bracket.final && bracket.final.length > 0) {
+      const thirdPlace = (bracket.final as KnockoutFixture[]).filter((f) => f.stage === "3P");
+      const final = (bracket.final as KnockoutFixture[]).filter((f) => f.stage === "F");
+      if (thirdPlace.length > 0) map.set("3P", thirdPlace);
+      if (final.length > 0) map.set("F", final);
+    }
+    return map;
+  }, [bracket]);
+
+  // Build a lookup: "Group A" -> [pos1name, pos2name, pos3name, pos4name]
+  const standingsLookup = useMemo(() => {
+    const map = new Map<string, string[]>(); // e.g. "A" -> ["Mexico","South Africa","South Korea","Czech Republic"]
+    for (const sg of standingsData) {
+      // sg.group is "Group A", "Group B", etc.
+      const letter = sg.group.replace("Group ", "").trim();
+      map.set(letter, sg.teams.map((t) => t.name));
+    }
+    return map;
+  }, [standingsData]);
+
+  // Resolve a bracket label like "Winner Group A" or "Runner-up Group B" to a real team name
+  function resolveLabel(label: string | null | undefined): string {
+    if (!label) return "TBD";
+    const winnerMatch = label.match(/^Winner Group ([A-Z])$/i);
+    if (winnerMatch) {
+      const teams = standingsLookup.get(winnerMatch[1].toUpperCase());
+      return teams?.[0] ?? label;
+    }
+    const runnerUpMatch = label.match(/^Runner-up Group ([A-Z])$/i);
+    if (runnerUpMatch) {
+      const teams = standingsLookup.get(runnerUpMatch[1].toUpperCase());
+      return teams?.[1] ?? label;
+    }
+    // "Best third-placed team A/B/C/D/F" — keep as-is, too complex to resolve without bracket gen
+    return label;
+  }
+
   const grouped = useMemo(() => {
     const map = new Map<string, Match[]>();
     for (const stage of STAGE_ORDER) {
@@ -215,10 +291,13 @@ function parseScorerDisplay(raw: string | null): string {
             {liveSource === "live" ? "Live Scores" : "Local"}
           </span>
         </div>
-        <p className="font-body-md text-sm md:text-body-md text-on-surface-variant">{mergedMatches.length} matches across {grouped.size} rounds</p>
+        <p className="font-body-md text-sm md:text-body-md text-on-surface-variant">
+          {mergedMatches.length} group matches · {Array.from(knockoutByStage.values()).reduce((s, a) => s + a.length, 0)} knockout fixtures
+        </p>
       </div>
 
       <div className="space-y-8">
+        {/* ── Group stage matches ── */}
         {Array.from(grouped.entries()).map(([stage, stageMatches]) => (
           <section key={stage}>
             <div className="flex items-center gap-3 mb-3">
@@ -293,6 +372,86 @@ function parseScorerDisplay(raw: string | null): string {
             </div>
           </section>
         ))}
+
+        {/* ── Knockout stages from bracket ── */}
+        {(["R32", "R16", "QF", "SF", "3P", "F"] as const).map((stage) => {
+          const fixtures = knockoutByStage.get(stage);
+          if (!fixtures || fixtures.length === 0) return null;
+          return (
+            <section key={stage}>
+              <div className="flex items-center gap-3 mb-3">
+                <h2 className="font-headline-sm text-headline-sm text-primary-container">{STAGE_LABELS[stage] || stage}</h2>
+                <span className="text-xs text-outline bg-surface-container-high px-2 py-0.5 rounded-full">{fixtures.length} match{fixtures.length !== 1 ? "es" : ""}</span>
+              </div>
+              <div className="grid gap-2">
+                {fixtures.map((fixture, idx) => {
+                  const homeName = stage === "R32"
+                    ? resolveLabel(fixture.homeLabel)
+                    : fixture.homeLabel || "TBD";
+                  const awayName = stage === "R32"
+                    ? resolveLabel(fixture.awayLabel)
+                    : fixture.awayLabel || "TBD";
+                  const isPlayed = fixture.played === true;
+                  const isLive = fixture.status === "IN_PLAY" || fixture.status === "PAUSED" || fixture.status === "LIVE";
+                  const inner = (
+                    <div className="flex items-center gap-3 md:gap-4">
+                      <span className="text-[10px] md:text-xs text-outline w-5 md:w-7 shrink-0 tabular-nums">{(fixture.matchNumber ?? idx + 1)}</span>
+                      <div className="hidden md:block w-20 shrink-0">
+                        <p className="text-[10px] text-outline font-medium">{formatDate(fixture.date)}</p>
+                        <p className="text-[10px] text-outline/60">{formatTime(fixture.date)}</p>
+                      </div>
+                      <div className="hidden md:block w-28 shrink-0 truncate">
+                        <p className="text-[10px] text-outline truncate">{fixture.venue || ""}</p>
+                      </div>
+                      <div className="flex-1 flex items-center justify-center gap-2 md:gap-4 min-w-0">
+                        <span className={`text-xs md:text-sm truncate text-right flex-1 ${isPlayed || isLive ? "text-on-surface font-semibold" : "text-on-surface-variant"}`}>
+                          {homeName}
+                        </span>
+                        <span className={`shrink-0 font-bold tabular-nums text-sm md:text-base min-w-[3ch] text-center ${isPlayed || isLive ? "text-secondary" : "text-outline"}`}>
+                          {isPlayed || isLive ? `${fixture.homeGoals ?? 0} - ${fixture.awayGoals ?? 0}` : "vs"}
+                        </span>
+                        <span className={`text-xs md:text-sm truncate flex-1 ${isPlayed || isLive ? "text-on-surface font-semibold" : "text-on-surface-variant"}`}>
+                          {awayName}
+                        </span>
+                      </div>
+                      <span className={`shrink-0 text-[10px] px-1.5 py-0.5 rounded-full ${
+                        isPlayed
+                          ? "bg-primary-container/10 text-primary-container"
+                          : isLive
+                          ? "bg-red-900/30 text-red-400 animate-pulse"
+                          : "bg-surface-variant text-outline"
+                      }`}>
+                        {isPlayed ? "FT" : isLive ? "LIVE" : "UPCOMING"}
+                      </span>
+                    </div>
+                  );
+                  const rowClass = `rounded-xl border px-3 py-2.5 md:px-5 md:py-3 transition-colors ${
+                    isPlayed
+                      ? "bg-surface-container border-outline-variant"
+                      : isLive
+                      ? "bg-red-900/20 border-red-500/40"
+                      : "bg-surface-container-low border-outline-variant/40"
+                  }`;
+                  const mobileDate = (
+                    <div className="block md:hidden text-[9px] text-outline/60 text-center mt-1 leading-tight">
+                      {formatDate(fixture.date)}{formatTime(fixture.date) ? ` ${formatTime(fixture.date)}` : ""}{fixture.venue ? ` · ${fixture.venue}` : ""}
+                    </div>
+                  );
+                  // If it has a real match id, make it a link; otherwise a plain div
+                  return fixture.id != null ? (
+                    <Link key={fixture.id} href={`/matches/${fixture.id}`} className={`block hover:ring-1 hover:ring-blue-500/50 ${rowClass}`}>
+                      {inner}{mobileDate}
+                    </Link>
+                  ) : (
+                    <div key={`${stage}-${idx}`} className={rowClass}>
+                      {inner}{mobileDate}
+                    </div>
+                  );
+                })}
+              </div>
+            </section>
+          );
+        })}
       </div>
     </main>
   );
