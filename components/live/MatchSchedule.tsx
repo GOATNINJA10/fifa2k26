@@ -198,6 +198,24 @@ function parseScorerDisplay(raw: string | null): string {
     return map;
   }, [bracket]);
 
+  // Merge live scores into knockout fixtures
+  const mergedKnockoutByStage = useMemo(() => {
+    if (liveMap.size === 0) return knockoutByStage;
+    const merged = new Map<string, KnockoutFixture[]>();
+    for (const [stage, fixtures] of knockoutByStage) {
+      const mergedFixtures = fixtures.map((f) => {
+        const homeName = stage === "R32" ? resolveLabel(f.homeLabel) : f.homeLabel;
+        const awayName = stage === "R32" ? resolveLabel(f.awayLabel) : f.awayLabel;
+        const key = `${normalizeName(homeName)}|${normalizeName(awayName)}`;
+        const live = liveMap.get(key);
+        if (!live) return f;
+        return { ...f, homeGoals: live.homeGoals ?? f.homeGoals, awayGoals: live.awayGoals ?? f.awayGoals, played: live.played ?? f.played, status: live.status ?? f.status };
+      });
+      merged.set(stage, mergedFixtures);
+    }
+    return merged;
+  }, [knockoutByStage, liveMap]);
+
   // Build a lookup: "Group A" -> [pos1name, pos2name, pos3name, pos4name]
   const standingsLookup = useMemo(() => {
     const map = new Map<string, string[]>(); // e.g. "A" -> ["Mexico","South Africa","South Korea","Czech Republic"]
@@ -407,7 +425,7 @@ function parseScorerDisplay(raw: string | null): string {
 
         {/* ── Knockout stages from bracket ── */}
         {(["R32", "R16", "QF", "SF", "3P", "F"] as const).map((stage) => {
-          const fixtures = knockoutByStage.get(stage);
+          const fixtures = mergedKnockoutByStage.get(stage);
           if (!fixtures || fixtures.length === 0) return null;
           return (
             <section key={stage}>

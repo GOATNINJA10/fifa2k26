@@ -228,8 +228,8 @@ export default function LiveDashboard() {
 
   function mergeLive(dbMatches: Match[], liveArray: Partial<Match>[]) {
     return dbMatches.map((m) => {
-      const home = normalizeName(m.homeTeam?.name ?? "");
-      const away = normalizeName(m.awayTeam?.name ?? "");
+      const home = normalizeName(m.homeLabel ?? m.homeTeam?.name ?? "");
+      const away = normalizeName(m.awayLabel ?? m.awayTeam?.name ?? "");
       const liveMatch = (liveArray as Partial<Match>[]).find((lm) => {
         const lh = lm.homeTeam && typeof lm.homeTeam === "object" ? normalizeName((lm.homeTeam as { name: string }).name) : "";
         const la = lm.awayTeam && typeof lm.awayTeam === "object" ? normalizeName((lm.awayTeam as { name: string }).name) : "";
