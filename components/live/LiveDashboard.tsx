@@ -165,12 +165,13 @@ export default function LiveDashboard() {
     setLoading(true);
     setError(null);
     try {
-      const [teamData, matchData, scorerData, goalScorerData, scheduleData] = await Promise.all([
+      const [teamData, matchData, scorerData, goalScorerData, scheduleData, bracketData] = await Promise.all([
         api.getTeams(),
         api.getMatches(),
         api.getTopScorers(),
         api.getGoalScorers(),
         api.getWcSchedule().catch(() => ({}) as Record<number, { dateTime: string; orderIndex: number }>),
+        api.getBracket().catch(() => null),
       ]);
       setTeams(teamData);
       setTopScorers(scorerData.data);
@@ -182,12 +183,41 @@ export default function LiveDashboard() {
         return m;
       });
 
+      // Merge bracket R32 fixtures into matches for Next Match display
+      let allMatches = [...withSchedule];
+      if (bracketData) {
+        const bracketFixtures = bracketData.r32 || bracketData.matches || [];
+        for (const f of bracketFixtures) {
+          if (!f.homeLabel && !f.awayLabel) continue;
+          // Avoid duplicates by checking if a group match covers the same fixture
+          const dup = allMatches.find(
+            (m) => m.matchNumber === f.matchNumber || (m.homeLabel === f.homeLabel && m.awayLabel === f.awayLabel),
+          );
+          if (!dup) {
+            allMatches.push({
+              id: 900 + (f.matchNumber ?? 0),
+              matchNumber: f.matchNumber,
+              homeLabel: f.homeLabel as string,
+              awayLabel: f.awayLabel as string,
+              homeTeam: null,
+              awayTeam: null,
+              date: (f as Record<string, unknown>).date as string | null,
+              venue: (f as Record<string, unknown>).venue as string | null,
+              stage: (f as Record<string, unknown>).stage as string | null || "R32",
+              homeGoals: 0,
+              awayGoals: 0,
+              played: false,
+            });
+          }
+        }
+      }
+
       const live = await api.getLiveMatches();
       if (live.source === "live" && live.matches.length > 0) {
         setLiveSource("live");
-        setMatches(mergeLive(withSchedule, live.matches));
+        setMatches(mergeLive(allMatches, live.matches));
       } else {
-        setMatches(withSchedule);
+        setMatches(allMatches);
       }
     } catch {
       setError(null);
