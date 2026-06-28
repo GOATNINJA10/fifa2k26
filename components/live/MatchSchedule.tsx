@@ -209,6 +209,33 @@ function parseScorerDisplay(raw: string | null): string {
     return map;
   }, [standingsData]);
 
+  // Build a lookup for third-placed teams with tiebreaker data
+  const thirdPlaceLookup = useMemo(() => {
+    const map = new Map<string, { name: string; points: number; goalDifference: number; goalsFor: number }>();
+    for (const sg of standingsData) {
+      const letter = sg.group.replace("Group ", "").trim();
+      if (sg.teams.length >= 3) {
+        const t = sg.teams[2];
+        map.set(letter, { name: t.name, points: t.points, goalDifference: t.goalDifference, goalsFor: t.goalsFor });
+      }
+    }
+    return map;
+  }, [standingsData]);
+
+  function bestThird(groups: string[]): string {
+    let best: { name: string; points: number; goalDifference: number; goalsFor: number } | null = null;
+    for (const g of groups) {
+      const t = thirdPlaceLookup.get(g);
+      if (!t) continue;
+      if (!best || t.points > best.points ||
+          (t.points === best.points && t.goalDifference > best.goalDifference) ||
+          (t.points === best.points && t.goalDifference === best.goalDifference && t.goalsFor > best.goalsFor)) {
+        best = t;
+      }
+    }
+    return best?.name ?? "";
+  }
+
   // Resolve a bracket label like "Winner Group A" or "Runner-up Group B" to a real team name
   function resolveLabel(label: string | null | undefined): string {
     if (!label) return "TBD";
@@ -222,7 +249,12 @@ function parseScorerDisplay(raw: string | null): string {
       const teams = standingsLookup.get(runnerUpMatch[1].toUpperCase());
       return teams?.[1] ?? label;
     }
-    // "Best third-placed team A/B/C/D/F" — keep as-is, too complex to resolve without bracket gen
+    const thirdMatch = label.match(/^Best third-placed team (.+)$/i);
+    if (thirdMatch) {
+      const groups = thirdMatch[1].split("/").map((s) => s.trim()).filter(Boolean);
+      const resolved = bestThird(groups);
+      return resolved || label;
+    }
     return label;
   }
 
