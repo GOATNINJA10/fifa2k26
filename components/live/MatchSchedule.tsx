@@ -435,14 +435,12 @@ function parseScorerDisplay(raw: string | null): string {
               </div>
               <div className="grid gap-2">
                 {fixtures.map((fixture, idx) => {
-                  const rawHome = fixture.homeLabel || "TBD";
-                  const rawAway = fixture.awayLabel || "TBD";
                   const homeName = stage === "R32"
-                    ? resolveLabel(rawHome)
-                    : /^(Winner|Loser) Match \d+$/i.test(rawHome) ? "TBD" : rawHome;
+                    ? resolveLabel(fixture.homeLabel)
+                    : fixture.homeLabel || "TBD";
                   const awayName = stage === "R32"
-                    ? resolveLabel(rawAway)
-                    : /^(Winner|Loser) Match \d+$/i.test(rawAway) ? "TBD" : rawAway;
+                    ? resolveLabel(fixture.awayLabel)
+                    : fixture.awayLabel || "TBD";
                   const isPlayed = fixture.played === true;
                   const isLive = fixture.status === "IN_PLAY" || fixture.status === "PAUSED" || fixture.status === "LIVE";
                   const inner = (
