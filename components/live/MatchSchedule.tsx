@@ -443,37 +443,50 @@ function parseScorerDisplay(raw: string | null): string {
                     : fixture.awayLabel || "TBD";
                   const isPlayed = fixture.played === true;
                   const isLive = fixture.status === "IN_PLAY" || fixture.status === "PAUSED" || fixture.status === "LIVE";
-                  const inner = (
-                    <div className="flex items-center gap-3 md:gap-4">
-                      <span className="text-[10px] md:text-xs text-outline w-5 md:w-7 shrink-0 tabular-nums">{(fixture.matchNumber ?? idx + 1)}</span>
-                      <div className="hidden md:block w-20 shrink-0">
-                        <p className="text-[10px] text-outline font-medium">{formatDate(fixture.date)}</p>
-                        <p className="text-[10px] text-outline/60">{formatTime(fixture.date)}</p>
-                      </div>
-                      <div className="hidden md:block w-28 shrink-0 truncate">
-                        <p className="text-[10px] text-outline truncate">{fixture.venue || ""}</p>
-                      </div>
-                      <div className="flex-1 flex items-center justify-center gap-2 md:gap-4 min-w-0">
-                        <span className={`text-xs md:text-sm truncate text-right flex-1 ${isPlayed || isLive ? "text-on-surface font-semibold" : "text-on-surface-variant"}`}>
-                          {homeName}
-                        </span>
-                        <span className={`shrink-0 font-bold tabular-nums text-sm md:text-base min-w-[3ch] text-center ${isPlayed || isLive ? "text-secondary" : "text-outline"}`}>
-                          {isPlayed || isLive ? `${fixture.homeGoals ?? 0} - ${fixture.awayGoals ?? 0}` : "vs"}
-                        </span>
-                        <span className={`text-xs md:text-sm truncate flex-1 ${isPlayed || isLive ? "text-on-surface font-semibold" : "text-on-surface-variant"}`}>
-                          {awayName}
-                        </span>
-                      </div>
-                      <span className={`shrink-0 text-[10px] px-1.5 py-0.5 rounded-full ${
-                        isPlayed
-                          ? "bg-primary-container/10 text-primary-container"
-                          : isLive
-                          ? "bg-red-900/30 text-red-400 animate-pulse"
-                          : "bg-surface-variant text-outline"
-                      }`}>
-                        {isPlayed ? "FT" : isLive ? "LIVE" : "UPCOMING"}
-                      </span>
+                  const scorerKey = `${normalizeName(homeName)}|${normalizeName(awayName)}`;
+                  const scorers = scorerMap.get(scorerKey);
+                  const hasScorers = (isPlayed || isLive) && scorers && (scorers.homeScorers || scorers.awayScorers);
+                  const scorersEl = hasScorers ? (
+                    <div className="flex justify-center gap-4 md:gap-8 mt-1.5 text-[10px] md:text-xs text-outline">
+                      <div className="text-right w-[35%] md:w-[40%]">{parseScorerDisplay(scorers.homeScorers)}</div>
+                      <div className="w-[20%] md:w-[20%]" />
+                      <div className="text-left w-[35%] md:w-[40%]">{parseScorerDisplay(scorers.awayScorers)}</div>
                     </div>
+                  ) : null;
+                  const inner = (
+                    <>
+                      <div className="flex items-center gap-3 md:gap-4">
+                        <span className="text-[10px] md:text-xs text-outline w-5 md:w-7 shrink-0 tabular-nums">{(fixture.matchNumber ?? idx + 1)}</span>
+                        <div className="hidden md:block w-20 shrink-0">
+                          <p className="text-[10px] text-outline font-medium">{formatDate(fixture.date)}</p>
+                          <p className="text-[10px] text-outline/60">{formatTime(fixture.date)}</p>
+                        </div>
+                        <div className="hidden md:block w-28 shrink-0 truncate">
+                          <p className="text-[10px] text-outline truncate">{fixture.venue || ""}</p>
+                        </div>
+                        <div className="flex-1 flex items-center justify-center gap-2 md:gap-4 min-w-0">
+                          <span className={`text-xs md:text-sm truncate text-right flex-1 ${isPlayed || isLive ? "text-on-surface font-semibold" : "text-on-surface-variant"}`}>
+                            {homeName}
+                          </span>
+                          <span className={`shrink-0 font-bold tabular-nums text-sm md:text-base min-w-[3ch] text-center ${isPlayed || isLive ? "text-secondary" : "text-outline"}`}>
+                            {isPlayed || isLive ? `${fixture.homeGoals ?? 0} - ${fixture.awayGoals ?? 0}` : "vs"}
+                          </span>
+                          <span className={`text-xs md:text-sm truncate flex-1 ${isPlayed || isLive ? "text-on-surface font-semibold" : "text-on-surface-variant"}`}>
+                            {awayName}
+                          </span>
+                        </div>
+                        <span className={`shrink-0 text-[10px] px-1.5 py-0.5 rounded-full ${
+                          isPlayed
+                            ? "bg-primary-container/10 text-primary-container"
+                            : isLive
+                            ? "bg-red-900/30 text-red-400 animate-pulse"
+                            : "bg-surface-variant text-outline"
+                        }`}>
+                          {isPlayed ? "FT" : isLive ? "LIVE" : "UPCOMING"}
+                        </span>
+                      </div>
+                      {scorersEl}
+                    </>
                   );
                   const rowClass = `rounded-xl border px-3 py-2.5 md:px-5 md:py-3 transition-colors ${
                     isPlayed
